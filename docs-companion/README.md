@@ -49,7 +49,7 @@ Automated QA uses the real extension and real canvas drawing with a cross-origin
 
 ## Update from 0.1.0 (formatting error fix)
 
-In your **existing** document-bound Apps Script project, replace the complete contents of **Code.gs** and **Sidebar.html** with the versions in this directory. Save, close the Docs sidebar and reopen it from **Quill → Open writing assistant**. The footer must show **Quill Docs 0.1.1**. Engine.gs, appsscript.json and your saved key do not need changing. No deployment is needed.
+In your **existing** document-bound Apps Script project, replace the complete contents of **Code.gs** and **Sidebar.html** with the versions in this directory. Save, close the Docs sidebar and reopen it from **Quill → Open writing assistant**. The footer must show **Quill Docs 0.2.0** for the current complete build. Engine.gs, appsscript.json and your saved key do not need changing. No deployment is needed.
 
 Select a short passage or put the cursor in a paragraph, then click **Test document access**. This reads the passage and verifies stable formatting without a Gemini request or any document edit. A success here confirms read access only. Next check `This are a test sentence.`, accept the correction and verify the actual document changes, then try Undo.
 
