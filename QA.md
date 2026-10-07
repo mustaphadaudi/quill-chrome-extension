@@ -1,8 +1,8 @@
-# QA — release 0.4.0
+# QA — release 0.4.1
 
 ## Executed locally
 
-`node --test tests/core.test.mjs`: **8 test groups passed, 0 failed**.
+`node --test tests/core.test.mjs`: **9 test groups passed, 0 failed**.
 
 Covered:
 - Manifest references, least API permission set, popup/options local asset references, external scripts and syntax of every JavaScript file.
@@ -15,6 +15,10 @@ Covered:
 The additional unit group checks that provider HTTP/model/reason diagnostics retain the actionable error while removing the API key and complete source passage, and that Gemini 3 requests retain the recommended temperature.
 
 ## Browser and live API status
+
+The 0.4.1 Chromium suite **passed**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37606213199
+
+New regression coverage confirms that pad suggestions and underlines survive sequential acceptances after replacement lengths change; Undo restores the previous suggestion list; dismissed suggestions remain excluded from apply-all; and the website card retains remaining suggestions without another manual check. Unit coverage includes growth, shrinkage, deletion, repeated words, stale-source rejection and unexpected editor transformations. All prior browser checks passed again. The initial browser fixture contained an ambiguous substring suggestion that correctly failed overlap validation; the fixture was corrected before the passing run. Transport is mocked, not a claim about live AI accuracy or real Docs editing.
 
 The 0.4.0 real Chromium extension suite **passed**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37602217820
 

@@ -17,7 +17,7 @@ Vanilla HTML, CSS and JavaScript, loaded directly as an unpacked Chrome extensio
 
 No npm or Python installation is required to use the extension. Update by replacing files in the SAME existing extension folder (or pulling changes), clicking Reload on the extension card, and reloading your website. Keeping the folder preserves the unpacked extension identity and its saved settings. Do not remove/reinstall it just to update.
 
-## Included in 0.4.0
+## Included in 0.4.1
 
 - Floating indicator and a clean shadow-root suggestion card.
 - Red underlines on checked suggestions, hover cards, and keyboard-accessible accept/dismiss without adding markup to your editor.
@@ -42,7 +42,7 @@ This release supports ordinary text/search inputs, textareas and contenteditable
 
 Google Docs document text is canvas-rendered, not a normal editable DOM field. On Docs, Quill shows a persistent Q button with an **Open writing pad** action. Copy a passage from Docs into the pad, check or rewrite it, then copy the result back. Automatic in-document checking or application in Google Docs is NOT implemented; the dictionary search box is not a document integration. Closed shadow roots and site-specific Gmail/Teams integrations remain future work. Red underlines work on supported DOM fields and in the writing pad; they do not cover canvas text in Docs. Chrome internal pages and the Chrome Web Store do not allow injection. Quill does not run on `file://` pages. Chrome New Tab and the browser address bar are protected Chrome UI and cannot host this content-script widget; the toolbar writing pad is available instead. Some websites can also interfere with injected UI or programmatic edits; test on your intended sites before relying on it.
 
-Checks are limited to 12,000 characters per request; oversized text is rejected without truncation. Text changing during a check invalidates the result. A single accepted edit clears the other suggestions to avoid using outdated positions; check again afterward. Dismissed suggestions are excluded from apply-all. Undo never overwrites writing that changed after an edit. AI suggestions require your review.
+Checks are limited to 12,000 characters per request; oversized text is rejected without truncation. Text changing during a check invalidates the result. Accepting a suggestion preserves unaffected suggestions and adjusts their positions without another Gemini request. Suggestions overlapping an accepted edit are removed, and exact text is checked again before application. Pad Undo restores the previous suggestions. Manually typing still clears old results to prevent stale edits. Dismissed suggestions are excluded from apply-all. Undo never overwrites writing that changed after an edit. AI suggestions require your review.
 
 ## Privacy and permissions
 
@@ -61,6 +61,7 @@ The `storage` permission persists preferences. HTTP/HTTPS content-script matches
 - `content/highlights.js`: measured underline overlay, hover cards and safe accept/dismiss.
 - `content/widget.js`, `content/widget.css`: floating UI and suggestion card.
 - `shared/settings.js`: validated local preferences.
+- `shared/suggestions.js`: checked offset updates that preserve remaining corrections.
 - `popup/`: toolbar controls.
 - `options/`: personal API key, model discovery, connection test and writing settings.
 - `workbench/`: paste/check/rewrite/copy pad for Docs and unsupported editors.
