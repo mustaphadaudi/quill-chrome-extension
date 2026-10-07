@@ -21,7 +21,7 @@
   q('.pad').addEventListener('click',()=>handlers.pad?.());
   q('.undo').addEventListener('click',()=>handlers.undo?.());
   root.addEventListener('keydown',event=>{if(event.key==='Escape'){setOpen(false);button.focus();}});
-  document.addEventListener('pointerdown',event=>{if(!event.composedPath().includes(host))setOpen(false);},true);
+  document.addEventListener('pointerdown',event=>{if(!event.composedPath().includes(host)&&!globalThis.QuillHighlights?.owns(event.target))setOpen(false);},true);
   function action(label,callback,classes='') {const b=document.createElement('button');b.type='button';b.textContent=label;b.className=classes;b.addEventListener('click',callback);return b;}
   globalThis.QuillWidget={
     bind(next){handlers=next;},
