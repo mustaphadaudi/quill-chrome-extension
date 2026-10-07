@@ -54,7 +54,9 @@
       if(!canvas.isConnected){visible.delete(canvas);continue;}
       if(!canvas.matches('canvas.kix-canvas-tile-content,.kix-page canvas,.kix-canvas-tile-content canvas'))continue;
       const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height||!canvas.width||!canvas.height)continue;
-      for(const r of records(canvas)){if(chars+r.text.length>100000||runs.length>=3000)break;chars+=r.text.length;runs.push({...r,canvasLeft:rect.left,canvasTop:rect.top,ratioX:rect.width/canvas.width,ratioY:rect.height/canvas.height,clip:{left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom}});}
+      const clip={left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom};
+      for(let parent=canvas.parentElement;parent;parent=parent.parentElement){const css=getComputedStyle(parent),bounds=parent.getBoundingClientRect();if(/auto|scroll|hidden|clip/.test(css.overflowX)){clip.left=Math.max(clip.left,bounds.left+parent.clientLeft);clip.right=Math.min(clip.right,bounds.left+parent.clientLeft+parent.clientWidth);}if(/auto|scroll|hidden|clip/.test(css.overflowY)){clip.top=Math.max(clip.top,bounds.top+parent.clientTop);clip.bottom=Math.min(clip.bottom,bounds.top+parent.clientTop+parent.clientHeight);}}
+      for(const r of records(canvas)){if(chars+r.text.length>100000||runs.length>=3000)break;chars+=r.text.length;runs.push({...r,canvasLeft:rect.left,canvasTop:rect.top,ratioX:rect.width/canvas.width,ratioY:rect.height/canvas.height,clip});}
     }
     window.postMessage({source:'quill-canvas',type:'snapshot',id:data.id,revision,runs},location.origin);
   });

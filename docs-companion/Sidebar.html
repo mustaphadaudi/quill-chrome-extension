@@ -78,7 +78,7 @@
     if(!docId)return;
     window.postMessage({source:'quill-docs-sidebar',type:'publish',payload:{nonce:bridgeNonce,docId,enabled:$('inline').checked,live:$('inline').checked&&$('liveDocs').checked,busy,session:session&&!session.rewrite?session:null}},location.origin);
   }
-  async function inlinePreferences(){await task('Saving inline preferences…',async()=>{settings(await rpc('docsSaveInline',{enabled:$('inline').checked,live:$('liveDocs').checked}));status('Inline preferences saved.');});}
+  async function inlinePreferences(){linked=false;await task('Saving inline preferences…',async()=>{settings(await rpc('docsSaveInline',{enabled:$('inline').checked,live:$('liveDocs').checked}));status('Inline preferences saved.');});}
   $('inline').addEventListener('change',inlinePreferences);$('liveDocs').addEventListener('change',inlinePreferences);
   window.addEventListener('message',event=>{
     const message=event.data;if(event.source!==window||message?.source!=='quill-docs-extension'||message.nonce!==bridgeNonce)return;

@@ -5,11 +5,12 @@
   const root=host.attachShadow({mode:'open'}),style=document.createElement('style');style.textContent=`:host{all:initial}.ink{position:fixed;inset:0;pointer-events:none}.mark{position:fixed;padding:0;border:0;background:transparent;pointer-events:auto;cursor:pointer;border-radius:2px}.mark:focus-visible{outline:2px solid #168463}.card{position:fixed;width:270px;max-width:calc(100vw - 24px);background:#fff;color:#20372e;border:1px solid #d8e5dd;border-radius:12px;box-shadow:0 12px 40px #183d302b;padding:14px;pointer-events:auto;font:13px/1.45 system-ui,sans-serif}.card[hidden]{display:none}.kind{color:#b43749;font-size:11px;text-transform:capitalize}.before{color:#b43749;white-space:pre-wrap}.after{color:#138364;white-space:pre-wrap}.explanation{color:#62766b;margin:8px 0 12px}.actions{display:flex;gap:7px}.actions button{font:inherit;padding:8px 12px;border:1px solid #d8e5dd;border-radius:7px;cursor:pointer;background:#fff;color:#244d3b}.actions .accept{background:#138364;color:white;border-color:#138364}button:focus-visible{outline:2px solid #168463;outline-offset:2px}button:disabled{opacity:.5;cursor:wait}.status{margin:8px 0 0;font-size:11px;color:#62766b}`;root.append(style);
   const ink=document.createElement('canvas');ink.className='ink';const marks=document.createElement('div'),card=document.createElement('div');card.className='card';card.hidden=true;card.role='dialog';card.setAttribute('aria-label','Quill correction');root.append(ink,marks,card);
   const ctx=ink.getContext('2d'),measureCtx=new OffscreenCanvas(1,1).getContext('2d');
-  let state=null,enabled=true,dirty=false,pending=false,openIndex=null,frame=0,latest='',feedback='',closeTimer=0,liveTimer=0,lastScroll=0,connectedAt=0;
+  let state=null,enabled=true,dirty=false,pending=false,openIndex=null,frame=0,latest='',feedback='',closeTimer=0,liveTimer=0,lastScroll=0,connectedAt=0,tabHint=null;
+  const currentTab=()=>new URL(location.href).searchParams.get('tab');
   function measure(run,text){measureCtx.font=run.font;measureCtx.fontKerning=run.kern||'auto';measureCtx.letterSpacing=run.letterSpacing||'0px';measureCtx.wordSpacing=run.wordSpacing||'0px';return measureCtx.measureText(text).width;}
   function clear(){ctx.clearRect(0,0,ink.width,ink.height);marks.replaceChildren();marks.dataset.signature='';card.hidden=true;openIndex=null;}
   function tell(text){if(text===feedback||!state?.nonce)return;feedback=text;void chrome.runtime.sendMessage({type:'QUILL_DOCS_FEEDBACK',nonce:state.nonce,text}).catch(()=>{});}
-  function schedule(){if(!frame)frame=requestAnimationFrame(()=>{frame=0;if(!state?.enabled||!state.session||dirty||!enabled||state.busy||pending||document.hidden){clear();return;}latest=crypto.randomUUID();window.postMessage({source:'quill-overlay',type:'snapshot',id:latest},location.origin);});}
+  function schedule(){if(!frame)frame=requestAnimationFrame(()=>{frame=0;if(state?.session&&tabHint!==currentTab()){dirty=true;clear();tell('Active Docs tab changed. Check the paragraph again.');return;}if(!state?.enabled||!state.session||dirty||!enabled||state.busy||pending||document.hidden){clear();return;}latest=crypto.randomUUID();window.postMessage({source:'quill-overlay',type:'snapshot',id:latest},location.origin);});}
   function draw(projected){
     const ratio=devicePixelRatio||1;if(ink.width!==Math.ceil(innerWidth*ratio)||ink.height!==Math.ceil(innerHeight*ratio)){ink.width=Math.ceil(innerWidth*ratio);ink.height=Math.ceil(innerHeight*ratio);ink.style.width=innerWidth+'px';ink.style.height=innerHeight+'px';}
     ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,innerWidth,innerHeight);ctx.strokeStyle='#d63b50';ctx.lineWidth=1.6;
@@ -46,7 +47,7 @@
     if(sender.id!==chrome.runtime.id)return;
     if(message.type==='QUILL_DOCS_STATE'){
       const previous=state;state=message.data;connectedAt=Date.now();pending=false;
-      if(previous?.session?.token!==state.session?.token||JSON.stringify(previous?.session)!==JSON.stringify(state.session)){dirty=false;marks.dataset.signature='';openIndex=null;card.hidden=true;}
+      if(previous?.session?.token!==state.session?.token||JSON.stringify(previous?.session)!==JSON.stringify(state.session)){dirty=false;tabHint=currentTab();marks.dataset.signature='';openIndex=null;card.hidden=true;}
       if(!state.enabled){clearTimeout(liveTimer);clear();}else schedule();
     }else if(message.type==='QUILL_DOCS_DIRTY')typed();else if(message.type==='QUILL_STATUS_CHANGED')void status();
   });
