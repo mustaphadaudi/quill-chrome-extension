@@ -10,7 +10,7 @@ Quill works with DOM-backed text inputs, textareas and contenteditable editors. 
 
 Keep the existing Chrome extension and Gemini connector. Build a separate personal Docs companion using Google Apps Script with an HTML/CSS sidebar. Google supports document text reads and writes through the Document service. The first milestone should check selected text or an explicitly chosen passage, show suggestions in the sidebar, and apply accepted corrections directly to the document. That removes copy/paste without promising canvas hover underlines. Authorize document access explicitly during installation and test in a disposable real document before using it on important work.
 
-Read access and write access must share a captured document tab and exact passage snapshot. Check that the passage still matches before edits. Account for formatting, repeated words, multi-element selections, concurrent editing, and undo behaviour. Do not use unguarded whole-document replaceAllText for an individual suggestion. None of this companion is implemented yet.
+Read access and write access must share a captured document tab and exact passage snapshot. Check that the passage still matches before edits. Account for formatting, repeated words, multi-element selections, concurrent editing, and undo behaviour. Do not use unguarded whole-document replaceAllText for an individual suggestion. The first companion is now implemented in docs-companion/: selected text or an explicit cursor paragraph within one Text element, direct accepted edits, single-paragraph rewrites, preserved remaining suggestions and guarded formatted Undo. Installation and real-account acceptance remain manual. Multi-element selections and atomic collaboration-safe writes are not implemented.
 
 If remaining entirely within the Chrome extension is essential, the Google Docs REST API is an alternative. It needs a separate OAuth setup and Google document-access consent; a Gemini API key does not authorize access to private Docs. Use exact document/tab ranges and requiredRevisionId to reject changed documents. The API alone does not provide our existing DOM underline geometry or active browser selection.
 
@@ -32,4 +32,4 @@ No third-party code has been copied into Quill for this update. Do not rely on p
 - Selection APIs: https://developers.google.com/apps-script/reference/document/document
 - REST write controls: https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/batchUpdate
 
-Research reviewed 7 October 2026. This is an integration proposal, not a claim that Docs edits, offline checking or canvas underlines have been built or tested.
+Research reviewed 7 October 2026. The document-bound Docs companion has now been built and fixture-tested; its real-account acceptance is still outstanding. Offline checking and Docs canvas underlines remain proposals.

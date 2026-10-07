@@ -1,8 +1,8 @@
-# QA — release 0.4.1
+# QA — release 0.5.0 with Docs companion 0.1.0
 
 ## Executed locally
 
-`node --test tests/core.test.mjs`: **9 test groups passed, 0 failed**.
+`npm test`: **17 test groups passed, 0 failed**.
 
 Covered:
 - Manifest references, least API permission set, popup/options local asset references, external scripts and syntax of every JavaScript file.
@@ -13,6 +13,16 @@ Covered:
 - Selected-passage replacement, guarded undo, stale-result protection and password exclusion by executing the actual editor script in a simulated field environment.
 
 The additional unit group checks that provider HTTP/model/reason diagnostics retain the actionable error while removing the API key and complete source passage, and that Gemini 3 requests retain the recommended temperature.
+
+## Docs companion QA
+
+The combined unit and Chromium suite **passed**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37609056114. The passing run includes all prior Chrome extension checks plus the complete sidebar workflow with the actual companion server under simulated Google APIs.
+
+Eight additional backend groups execute the complete Apps Script server and generated engine with simulated Docs/cache/formatting/HTTP APIs. They verify current-document-only scopes, generated-engine parity, selected-passage privacy, hidden key/header authentication, direct sequential acceptances, retained suggestions, exact-range text/style undo, dismissed changes excluded from apply-all, guarded rewrites/deletions, quota errors/cooldown, and rejection of changed text, target styles, document identities, tabs, absent/multiple selections and expired sessions.
+
+The Chromium test loads the actual Sidebar.html and connects it to that same server fixture. It exercises settings/key setup, sample connection testing, direct acceptance, remaining suggestions, undo, dismissal/apply-all, key removal and stale-document failure feedback. This simulates the Google service, not a live authorized Apps Script installation. Real Docs selection behaviour, actual formatting API semantics, authorization and model accuracy still require the manual acceptance in docs-companion/README.md.
+
+The first browser run found an invalid sample response in the Google HTTP fixture; its fake connection probe now returns edits matching the sample sentence.
 
 ## Browser and live API status
 
