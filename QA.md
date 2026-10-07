@@ -14,7 +14,11 @@ Covered:
 
 ## Browser and live API status
 
-Local Chromium launch could not run: its browser binary was absent and the browser download failed. This is **not** a browser test pass. GitHub Actions is configured to run the real-extension smoke suite with mocked Gemini transport; consult the latest workflow result for its status.
+Local Chromium could not run because its download failed. The real-extension smoke suite subsequently **passed in GitHub Actions**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37593394615
+
+Verified in Chromium: injection and card opening; unchanged source before acceptance; mocked Gemini correction and undo; excluded password/email/payment/read-only fields; dynamically added textarea; live popup pause and persistent preferences; Escape/off-screen hiding; raw local storage blocked from the content-script world; only public settings returned; no popup/fixture runtime errors.
+
+Browser QA found and fixed a genuine pause-state bug: trusted-only storage does not broadcast changes to content scripts. The worker now sends a public status-change notification to tabs without exposing stored keys.
 
 Windows Chrome acceptance, intended production websites and a real Gemini API key remain unverified. No real API key was supplied or used. Model writing quality is not established by transport mocks.
 
