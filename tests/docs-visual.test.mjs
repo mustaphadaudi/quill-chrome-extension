@@ -11,7 +11,7 @@ test('Docs geometry maps exact selected offsets across wrapped lines and canvas 
  let result=geometry.project(s.anchor,s.suggestions,runs,measure);assert.equal(result.marks.length,3);assert.equal(result.marks[0].left,110);assert.equal(result.marks[0].right,140);assert.equal(result.marks[2].top,88);
  const scaled=runs.map(r=>({...r,sx:2,width:r.width*2,ratioX:.5,ratioY:.5,x:0,y:r.y*2,top:r.top*2,bottom:r.bottom*2}));result=geometry.project(s.anchor,s.suggestions,scaled,measure);assert.equal(result.marks[0].left,110);assert.equal(result.marks[2].top,88);
 });
-test('Docs geometry rejects stale, duplicate, partial, RTL-unsupported and malformed matches',()=>{
+test('Docs geometry rejects stale, duplicate, partial and malformed matches',()=>{
  const f=fixture(),s=f.api.docsCheck({scope:'selection',mode:'check'}),runs=[run(s.anchor.full)];
  assert.equal(geometry.project({...s.anchor,unique:false},s.suggestions,runs,measure).marks.length,0);
  assert.equal(geometry.project(s.anchor,s.suggestions,[run(s.anchor.full),run(s.anchor.full,0,70)],measure).marks.length,0);

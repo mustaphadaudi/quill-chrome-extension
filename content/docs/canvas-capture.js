@@ -43,6 +43,10 @@
       for(const r of [...input.runs]){if(r.x<sx||r.x+r.width>sx+sw||r.top<sy||r.bottom>sy+sh)continue;const p=point(m,dx+(r.x-sx)*dw/sw,dy+(r.y-sy)*dh/sh);const t=point(m,dx,dy+(r.top-sy)*dh/sh),b=point(m,dx,dy+(r.bottom-sy)*dh/sh);add(ctx.canvas,{...r,x:p.x,y:p.y,top:t.y,bottom:b.y,sx:r.sx*ax,sy:r.sy*ay,width:r.width*ax});}
     });
   }
+  for(const proto of [globalThis.HTMLCanvasElement?.prototype,globalThis.OffscreenCanvas?.prototype])for(const name of ['width','height']){
+    const descriptor=proto&&Object.getOwnPropertyDescriptor(proto,name);if(!descriptor?.set||!descriptor.configurable)continue;
+    Object.defineProperty(proto,name,{...descriptor,set(value){Reflect.apply(descriptor.set,this,[value]);stores.delete(this);if(this.getRootNode?.().host?.id!=='quill-docs-overlay')changed();}});
+  }
   window.addEventListener('message',event=>{
     const data=event.data;if(event.source!==window||event.origin!==location.origin||data?.source!=='quill-overlay'||data.type!=='snapshot'||typeof data.id!=='string'||data.id.length>80)return;
     const runs=[];let chars=0;
