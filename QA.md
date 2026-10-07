@@ -1,8 +1,8 @@
-# QA — release 0.2.0
+# QA — release 0.3.0
 
 ## Executed locally
 
-`node --test tests/core.test.mjs`: **6 test groups passed, 0 failed**.
+`node --test tests/core.test.mjs`: **7 test groups passed, 0 failed**.
 
 Covered:
 - Manifest references, least API permission set, popup/options local asset references, external scripts and syntax of every JavaScript file.
@@ -13,6 +13,11 @@ Covered:
 - Selected-passage replacement, guarded undo, stale-result protection and password exclusion by executing the actual editor script in a simulated field environment.
 
 ## Browser and live API status
+
+The expanded 0.3.0 Chromium suite **passed**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37597879869
+
+Verified rich-text correction with formatting retained, native undo, open shadow roots, search inputs, iframe injection, writing-pad checks/undo and a persistent Q on a simulated Docs canvas page. This is fixture-based coverage, not live Google Docs document editing. The prior run below applies to 0.2.0.
+
 
 Local Chromium could not run because its download failed. The real-extension smoke suite subsequently **passed in GitHub Actions**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37593394615
 
@@ -36,4 +41,4 @@ Windows Chrome acceptance, intended production websites and a real Gemini API ke
 
 ## Scope
 
-Standard inputs and textareas only; rich text, iframes, inline underlines and site-specific editor integrations are future work.
+Standard inputs, textareas and DOM contenteditable editors, including open shadow roots and frames. Google Docs has a persistent writing-pad fallback, NOT automatic canvas text access. Actual third-party sites, a personal API key and native Chrome restricted surfaces are not established as working by simulated fixtures.
