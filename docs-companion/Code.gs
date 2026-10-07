@@ -1,5 +1,5 @@
 /** @OnlyCurrentDoc */
-const QUILL_DOCS = {version:'0.1.0', model:'gemini-3.5-flash-lite', ttl:1800, maxNode:24000};
+const QUILL_DOCS = {version:'0.1.1', model:'gemini-3.5-flash-lite', ttl:1800, maxNode:24000};
 function onOpen(){DocumentApp.getUi().createMenu('Quill').addItem('Open writing assistant','showQuill').addToUi();}
 function showQuill(){DocumentApp.getUi().showSidebar(HtmlService.createHtmlOutputFromFile('Sidebar').setTitle('Quill · personal writing assistant'));}
 function docsSettings(){
@@ -13,13 +13,18 @@ function docsSaveSettings(input){
   return docsSettings();
 }
 function docsRemoveKey(){PropertiesService.getUserProperties().deleteProperty('quillKey');return docsSettings();}
+function docsTestDocument(){
+  const doc=DocumentApp.getActiveDocument(),scope=doc.getSelection()?'selection':'paragraph';
+  const snap=docsCapture_(scope);docsLocate_(snap);
+  return {message:'Quill Docs '+QUILL_DOCS.version+' · Document access passed. The '+scope+' and its formatting can be read consistently. No text changed and no Gemini request was made.'};
+}
 function docsTestConnection(){docsGenerate_('This are a test sentence.','check');return {message:'Connected. Your saved key and model checked a sample sentence.'};}
 function docsCheck(input){
   if(!input||!MODES.includes(input.mode)||!['selection','paragraph'].includes(input.scope))throw new Error('Unknown writing action.');
   const lock=LockService.getUserLock();if(!lock.tryLock(1000))throw new Error('Another Quill action is running. Please wait.');
   try{
     const snap=docsCapture_(input.scope);validateRequest(snap.text,input.mode);
-    const result=docsGenerate_(snap.text,input.mode);docsLocate_(snap);
+    docsLocate_(snap);const result=docsGenerate_(snap.text,input.mode);docsLocate_(snap);
     if(result.rewrite&&/[\r\n]/.test(result.rewrite))throw new Error('This rewrite adds paragraph breaks. Use the writing pad for multi-paragraph rewrites.');
     if(result.suggestions.some(edit=>/[\r\n]/.test(edit.replacement)))throw new Error('A suggestion adds paragraph breaks. Check a smaller passage.');
     const session={snap,result,remaining:result.suggestions,undo:null};const token=Utilities.getUuid();docsStore_(token,session);
@@ -62,7 +67,10 @@ function docsCapture_(scope){
     node=texts[0];start=0;end=node.getText().length;
   }
   const full=node.getText();if(full.length>QUILL_DOCS.maxNode)throw new Error('This paragraph is too large. Split it into smaller paragraphs first.');
-  const path=docsPath_(node,body),snap={docId:doc.getId(),tabId:tab.getId(),path,full,start,end,text:full.slice(start,end),hash:docsHash_(body.getText()),formatHash:docsFormatHash_(node)};
+  // Capture formatting through the same body path used during application.
+  // A selection's Text wrapper need not serialize attributes identically.
+  const path=docsPath_(node,body),canonical=docsTextAt_(body,path,full);
+  const snap={docId:doc.getId(),tabId:tab.getId(),path,full,start,end,text:full.slice(start,end),hash:docsHash_(body.getText()),formatHash:docsFormatHash_(canonical)};
   validateRequest(snap.text,'check');return snap;
 }
 function docsPath_(node,body){
@@ -74,21 +82,31 @@ function docsLocate_(snap){
   const doc=DocumentApp.getActiveDocument();if(doc.getId()!==snap.docId||doc.getActiveTab().getId()!==snap.tabId)throw new Error('The document or active tab changed. Return to the checked tab and check again.');
   const body=doc.getActiveTab().asDocumentTab().getBody();
   if(docsHash_(body.getText())!==snap.hash)throw new Error('Document text changed since the check. Check again before applying.');
-  let node=body;for(const index of snap.path){if(typeof node.getNumChildren!=='function'||index<0||index>=node.getNumChildren())throw new Error('The passage moved. Check again.');node=node.getChild(index);}
-  if(node.getType()!==DocumentApp.ElementType.TEXT||node.asText().getText()!==snap.full)throw new Error('The passage changed or moved. Check again.');
-  if(snap.formatHash!==docsFormatHash_(node.asText()))throw new Error('Passage formatting changed. Check again before applying.');
-  return {node:node.asText(),body};
+  const node=docsTextAt_(body,snap.path,snap.full);
+  if(snap.formatHash!==docsFormatHash_(node))throw new Error('Passage formatting changed. Check again before applying.');
+  return {node,body};
+}
+function docsTextAt_(body,path,full){
+  let node=body;for(const index of path){if(typeof node.getNumChildren!=='function'||index<0||index>=node.getNumChildren())throw new Error('The passage moved. Check again.');node=node.getChild(index);}
+  if(node.getType()!==DocumentApp.ElementType.TEXT||node.asText().getText()!==full)throw new Error('The passage changed or moved. Check again.');return node.asText();
 }
 function docsHash_(text){return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,text,Utilities.Charset.UTF_8));}
 function docsAttrs_(attrs){
-  const copy={};for(const key of Object.keys(attrs)){const value=attrs[key];if(key==='TEXT_ALIGNMENT'&&value!=null)copy[key]=String(value);else if(value==null||['string','number','boolean'].includes(typeof value))copy[key]=value;}
+  const copy={};for(const key of Object.keys(attrs).sort()){const value=attrs[key];if(key==='TEXT_ALIGNMENT'&&value!=null)copy[key]=String(value);else if(value==null||['string','number','boolean'].includes(typeof value))copy[key]=value;}
   return copy;
 }
 function docsRestoreAttrs_(attrs){const copy={...attrs};if(copy.TEXT_ALIGNMENT!=null)copy.TEXT_ALIGNMENT=DocumentApp.TextAlignment[copy.TEXT_ALIGNMENT];return copy;}
 function docsFormatHash_(node){const full=node.getText();return docsHash_(JSON.stringify(full.length?docsRuns_(node,0,full.length):[]));}
 function docsRuns_(node,start,end){
-  const indices=[start,...node.getTextAttributeIndices().filter(i=>i>start&&i<end)];
-  return indices.map((index,i)=>({start:index-start,end:(indices[i+1]||end)-start,attrs:docsAttrs_(node.getAttributes(index))}));
+  if(end<=start)return [];
+  const indices=[start,...new Set(node.getTextAttributeIndices().filter(i=>i>start&&i<end))].sort((a,b)=>a-b),runs=[];
+  // Extra boundaries between identical styles are not formatting changes.
+  for(let i=0;i<indices.length;i++){
+    const index=indices[i],attrs=docsAttrs_(node.getAttributes(index)),last=runs[runs.length-1],runEnd=(indices[i+1]??end)-start;
+    if(last&&JSON.stringify(last.attrs)===JSON.stringify(attrs))last.end=runEnd;
+    else runs.push({start:index-start,end:runEnd,attrs});
+  }
+  return runs;
 }
 function docsReplace_(node,start,end,replacement,attrs){
   if(end>start)node.deleteText(start,end-1);

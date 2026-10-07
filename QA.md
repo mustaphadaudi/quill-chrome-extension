@@ -73,3 +73,11 @@ After updating files in the same unpacked-extension folder and reloading Chrome 
 ## Scope
 
 Standard inputs, textareas and DOM contenteditable editors, including open shadow roots and frames. Google Docs has a persistent writing-pad fallback, NOT automatic canvas text access. Actual third-party sites, a personal API key and native Chrome restricted surfaces are not established as working by simulated fixtures.
+
+## Docs companion 0.1.1 formatting regression
+
+The installed native sidebar reported “Passage formatting changed” before suggestions appeared. The previous guard hashed unsorted attribute objects and raw style-run boundaries. A regression test reproduced the exact failure with unchanged italic, bold and linked text when attribute enumeration order or equivalent boundaries changed.
+
+The fix uses the body-path Text element consistently, sorts attribute keys and merges equal adjacent formatting runs. Genuine link/style mutations still reject stale edits. Added a no-key/no-Gemini **Test document access** probe and visible backend version. Existing script users replace Code.gs and Sidebar.html only; key/settings/scopes remain unchanged.
+
+Local backend/syntax QA passed after the regression initially failed on the old code. Chromium CI also exercises reordered attributes and the new diagnostic before key setup. Live Google Apps Script behaviour, Gemini output quality and in-document acceptance in the user's document are still unverified. This companion does not provide live Docs underlines or word-hover editing.

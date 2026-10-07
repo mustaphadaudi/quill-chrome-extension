@@ -17,6 +17,7 @@
   <div class="row"><select id="mode"><option value="clearer">Clearer</option><option value="concise">More concise</option><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="confident">Confident</option></select><button id="rewrite" type="button">Rewrite selection</button></div>
   <p class="note">Checks send only the chosen passage to Gemini. This version checks on request; it does not add live underlines to the document.</p>
   <p id="status" role="status" aria-live="polite">Loading settings…</p>
+  <button id="documentTest" type="button">Test document access</button>
   <section id="checked" hidden><label for="passage">Checked passage</label><textarea id="passage" readonly aria-label="Checked passage"></textarea><h2 id="count">Suggestions</h2><div id="results"></div><div class="row"><button id="undo" type="button" disabled>Undo last Quill edit</button><button id="clear" type="button">Clear check</button></div></section>
   <details id="settings"><summary>Gemini settings</summary><form id="preferences">
     <p id="keyStatus" class="note">Loading key status…</p>
@@ -28,14 +29,14 @@
     <p class="note">The companion stores its own key in your Apps Script user properties. Your Chrome extension key is not transferred. Google quotas apply; use a project with billing disabled for free usage.</p>
     <a href="https://aistudio.google.com/apikey" rel="noreferrer">Open Google AI Studio ↗</a>
   </form></details>
-  <footer>Personal edition · no subscriptions<br>Checks expire after up to 30 minutes. Recheck after changing document text or tabs.</footer>
+  <footer><span id="version">Personal edition</span> · no subscriptions<br>Checks expire after up to 30 minutes. Recheck after changing document text or tabs.</footer>
 </main>
 <script>
 (() => {
   const $=id=>document.getElementById(id);let session=null,busy=false,hasKey=false;
   const rpc=(name,...args)=>new Promise((resolve,reject)=>{const runner=google.script.run.withSuccessHandler(resolve).withFailureHandler(error=>reject(new Error(error.message||'The Docs companion could not complete this action.')));runner[name](...args);});
   function status(message){$('status').textContent=message;}
-  function settings(value){hasKey=value.hasKey;$('model').value=value.model;$('language').value=value.language;$('keyStatus').textContent=value.hasKey?'A key is saved for your Google account in this script.':'Save your Gemini API key to start.';$('remove').disabled=!value.hasKey;if(!value.hasKey)$('settings').open=true;}
+  function settings(value){hasKey=value.hasKey;$('version').textContent=`Quill Docs ${value.version}`;$('model').value=value.model;$('language').value=value.language;$('keyStatus').textContent=value.hasKey?'A key is saved for your Google account in this script.':'Save your Gemini API key to start.';$('remove').disabled=!value.hasKey;if(!value.hasKey)$('settings').open=true;}
   function button(label,callback,primary=false){const element=document.createElement('button');element.type='button';element.textContent=label;if(primary)element.className='primary';element.addEventListener('click',callback);return element;}
   function render(){
     $('results').replaceChildren();$('checked').hidden=!session;if(!session)return;
@@ -66,6 +67,7 @@
   }
   async function save(){const value=await rpc('docsSaveSettings',{key:$('key').value,model:$('model').value.trim(),language:$('language').value});$('key').value='';settings(value);return value;}
   $('selection').addEventListener('click',()=>check('selection'));
+  $('documentTest').addEventListener('click',()=>task('Testing document access without Gemini…',async()=>{const response=await rpc('docsTestDocument');status(response.message);}));
   $('paragraph').addEventListener('click',()=>check('paragraph'));
   $('rewrite').addEventListener('click',()=>check('selection',$('mode').value));
   $('undo').addEventListener('click',()=>change('undo'));

@@ -43,3 +43,17 @@ test('rewrites target only the selected passage and reject new paragraphs',()=>{
 test('provider failures redact secrets, persist quota cooldown and key removal works',()=>{
  const f=fixture();f.api.UrlFetchApp.fetch=()=>({getResponseCode:()=>429,getContentText:()=>JSON.stringify({error:{message:'Quota for fixture-private-key'}})});assert.throws(()=>f.api.docsCheck({scope:'selection',mode:'check'}),error=>error.message.includes('HTTP 429')&&!error.message.includes('fixture-private-key'));assert.ok(Number(f.props.get('quillCooldown'))>Date.now());assert.throws(()=>f.api.docsTestConnection(),/cooling down/);f.api.docsRemoveKey();assert.equal(f.api.docsSettings().hasKey,false);assert.throws(()=>f.api.docsTestConnection(),/Save your Gemini API key/);
 });
+test('unchanged formatting survives reordered Google attribute maps and redundant style boundaries',()=>{
+ const f=fixture();for(let i=9;i<12;i++)f.node.attributes[i].ITALIC=true;for(let i=20;i<23;i++)f.node.attributes[i].LINK_URL='https://example.com';
+ const before=JSON.parse(JSON.stringify(f.node.attributes)),getAttributes=f.node.getAttributes.bind(f.node),getIndices=f.node.getTextAttributeIndices.bind(f.node);let reordered=false;
+ f.node.getAttributes=index=>Object.fromEntries(reordered?Object.entries(getAttributes(index)).reverse():Object.entries(getAttributes(index)));
+ f.node.getTextAttributeIndices=()=>reordered?[...new Set([...getIndices(),7,8,15])].sort((a,b)=>a-b):getIndices();
+ f.setFetch(()=>{reordered=true;});
+ const result=f.api.docsCheck({scope:'selection',mode:'check'});assert.equal(result.suggestions.length,3);
+ reordered=false;f.api.docsChange(result.token,'accept',0);reordered=true;f.api.docsChange(result.token,'undo');assert.equal(f.node.getText(),original);assert.deepEqual(f.node.attributes,before);
+ const next=f.api.docsCheck({scope:'selection',mode:'check'});f.node.attributes[20].LINK_URL='https://changed.example';assert.throws(()=>f.api.docsChange(next.token,'all'),/formatting changed/);assert.equal(f.node.getText(),original);
+});
+test('document diagnostic works without a key, API quota or mutations and reports unsupported selections',()=>{
+ const f=fixture();f.api.docsRemoveKey();const before=JSON.stringify(f.node.attributes),result=f.api.docsTestDocument();assert.match(result.message,/Quill Docs 0\.1\.1.*Document access passed/);assert.equal(f.calls.length,0);assert.equal(f.cache.size,0);assert.equal(f.node.getText(),original);assert.equal(JSON.stringify(f.node.attributes),before);
+ const doc=f.api.DocumentApp.getActiveDocument(),selection=doc.getSelection;doc.getSelection=()=>null;assert.match(f.api.docsTestDocument().message,/paragraph/);doc.getSelection=selection;f.setScope('multiple');assert.throws(()=>f.api.docsTestDocument(),/one paragraph/);assert.equal(f.calls.length,0);
+});

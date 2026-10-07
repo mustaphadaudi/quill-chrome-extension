@@ -1,4 +1,4 @@
-# Quill for Google Docs — personal companion 0.1.0
+# Quill for Google Docs — personal companion 0.1.1
 
 A native Google Docs sidebar that checks a selected passage or the paragraph containing your cursor, then applies accepted corrections directly in the document. Vanilla HTML/CSS/JavaScript UI and a Google Apps Script backend. Uses your personal Gemini key. No subscriptions, upgrade prompts, public web app or billing configuration.
 
@@ -21,8 +21,17 @@ This is a separate companion to the Chrome extension. Installing or reloading th
 
 The files are also available from the repository's `docs-companion/` directory after **Code → Download ZIP**. Copy full file contents, without Markdown code fences or the filename, into Apps Script. All four files are required.
 
+## Update from 0.1.0 (formatting error fix)
+
+In your **existing** document-bound Apps Script project, replace the complete contents of **Code.gs** and **Sidebar.html** with the versions in this directory. Save, close the Docs sidebar and reopen it from **Quill → Open writing assistant**. The footer must show **Quill Docs 0.1.1**. Engine.gs, appsscript.json and your saved key do not need changing. No deployment is needed.
+
+Select a short passage or put the cursor in a paragraph, then click **Test document access**. This reads the passage and verifies stable formatting without a Gemini request or any document edit. A success here confirms read access only. Next check `This are a test sentence.`, accept the correction and verify the actual document changes, then try Undo.
+
+This update fixes a false “Passage formatting changed” rejection caused by comparing the serialization order of attribute objects and equivalent formatting runs. Formatting is now captured through the same body path used for editing, with sorted attribute keys and merged adjacent equivalent runs. Actual style changes still require rechecking. Automated tests reproduce the old error and verify sequential edits, Undo and stale-style rejection after the fix. Live Google Docs acceptance still needs verification in your document.
+
 ## Use
 
+- **Test document access** checks passage read access without requiring a key or calling Gemini. It preserves the current suggestions and does not edit the document.
 - **Check selection** reads only the selected text.
 - **Check paragraph** reads the text of the paragraph containing your cursor. Click inside the paragraph first.
 - **Rewrite selection** proposes a rewrite without changing the document. **Apply rewrite in Docs** applies it explicitly.
