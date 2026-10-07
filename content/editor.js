@@ -75,6 +75,6 @@
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!widget.owns(event.target))widget.hide();});
   window.addEventListener('scroll',schedule,true);window.addEventListener('resize',schedule);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(timer);widget.hide();}else refreshStatus();});
-  chrome.storage.onChanged.addListener((changes,area)=>{if(area==='local'&&(changes.settings||changes.apiKey)){epoch++;clearTimeout(timer);widget.reset();refreshStatus();}});
+  chrome.runtime.onMessage.addListener((message,sender)=>{if(sender.id===chrome.runtime.id&&message?.type==='QUILL_STATUS_CHANGED'){epoch++;clearTimeout(timer);widget.reset();refreshStatus();}});
   choose(supported(document.activeElement)?document.activeElement:null);refreshStatus();
 })();

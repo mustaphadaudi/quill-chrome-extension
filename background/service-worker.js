@@ -41,4 +41,12 @@ chrome.runtime.onMessage.addListener((message,sender,reply) => {
   handle(message,sender).then(reply).catch(error => reply({ok:false,error:error.message || 'Quill could not process this request.'}));
   return true;
 });
-chrome.storage.onChanged.addListener((changes,area) => {if(area==='local' && (changes.apiKey || changes.settings)) cache.clear();});
+chrome.storage.onChanged.addListener((changes,area) => {
+  if(area !== 'local' || !(changes.apiKey || changes.settings)) return;
+  cache.clear();
+  // Trusted-only storage deliberately hides change events from content scripts.
+  // Broadcast a public notification instead. No key or stored value is included.
+  chrome.tabs.query({}).then(tabs => Promise.allSettled(tabs.map(tab =>
+    chrome.tabs.sendMessage(tab.id,{type:'QUILL_STATUS_CHANGED'})
+  ))).catch(() => {});
+});
