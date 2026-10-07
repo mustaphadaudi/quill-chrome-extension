@@ -115,7 +115,8 @@ const server = http.createServer((req, res) => {
       contextId: isolated.id, awaitPromise: true, returnByValue: true,
       expression: 'chrome.runtime.sendMessage({type:"QUILL_GET_STATUS"})'
     });
-    assert.deepEqual(Object.keys(response.result.value.settings), ['enabled']);
+    assert.deepEqual(Object.keys(response.result.value.settings).sort(), ['autoCheck','enabled']);
+    assert.equal(response.result.value.apiKey, undefined);
     console.log('PASS: content script cannot read raw storage; messages expose only enabled flag');
     await worker.evaluate(() => chrome.storage.local.remove('qaSecret'));
     assert.deepEqual(errors, []);
