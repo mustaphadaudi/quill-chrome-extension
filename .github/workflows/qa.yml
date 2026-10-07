@@ -1,0 +1,21 @@
+name: Quill QA
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Unit and syntax QA
+        run: node --test tests/core.test.mjs
+      - name: Install browser test tooling
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Real extension smoke test with mocked Gemini
+        run: npm run test:browser

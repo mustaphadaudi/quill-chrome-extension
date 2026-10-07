@@ -25,3 +25,5 @@ header p { font-size: 11px; margin-top: 4px; color: #67776f; }
 #status { min-height: 20px; font-size: 12px; margin: 16px 0; color: #62726a; }
 footer { display: flex; justify-content: space-between; border-top: 1px solid #edf0ee; padding-top: 14px; font-size: 10px; color: #67776f; }
 @media (prefers-reduced-motion: reduce) { .switch span::after { transition: none; } }
+
+#settings{width:100%;padding:10px;margin-top:16px;border:1px solid #d8e9e0;border-radius:8px;background:white;color:#12865b;font:inherit;cursor:pointer}

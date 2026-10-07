@@ -24,3 +24,5 @@ enabled.addEventListener("change", async () => {
     enabled.disabled = false;
   }
 });
+
+document.getElementById("settings").addEventListener("click",()=>chrome.runtime.openOptionsPage());

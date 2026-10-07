@@ -14,8 +14,8 @@ const referenced = [manifest.background.service_worker, manifest.action.default_
 for (const file of referenced) assert.ok(fs.existsSync(path.join(project, file)), `Missing: ${file}`);
 assert.equal(manifest.manifest_version, 3);
 assert.deepEqual(manifest.permissions, ['storage']);
-assert.equal(manifest.host_permissions, undefined);
-const files = fs.readdirSync(project, {recursive: true}).filter(file => /\.(js|cjs)$/.test(file));
+assert.deepEqual(manifest.host_permissions, ['https://generativelanguage.googleapis.com/*']);
+const files = fs.readdirSync(project, {recursive: true}).filter(file => !file.startsWith('node_modules') && !file.startsWith('.git') && /\.(js|cjs|mjs)$/.test(file));
 for (const file of files) execFileSync(process.execPath, ['--check', path.join(project, file)]);
 console.log('PASS: manifest references, minimum permissions and all JavaScript syntax');
 
@@ -51,6 +51,19 @@ const server = http.createServer((req, res) => {
     await host.click();
     await page.screenshot({path: path.join(os.tmpdir(), 'quill-widget-qa.png')});
     console.log('PASS: real extension injected; widget opens; original text unchanged');
+    await worker.evaluate(async () => {
+      await chrome.storage.local.set({apiKey:'browser-fixture-key'});
+      globalThis.fetch = async () => ({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({summary:'Fix verb agreement.',tone:'Neutral',rewrite:'',suggestions:[{original:'are',replacement:'is',explanation:'Singular subject.',category:'grammar',occurrence:0}]})}]}}]})});
+    });
+    await page.locator('#plain').focus();
+    await host.locator('.indicator').click();
+    await host.locator('.check').click();
+    await host.locator('.accept').waitFor();
+    await host.locator('.accept').click();
+    assert.equal(await page.locator('#plain').inputValue(), 'This is a test sentence.');
+    await host.locator('.undo').click();
+    assert.equal(await page.locator('#plain').inputValue(), 'This are a test sentence.');
+    console.log('PASS: correction and undo with mocked Gemini transport');
     for (const selector of ['#password', '#email', '#readonly', '#card']) {
       await page.locator(selector).focus();
       await host.waitFor({state: 'hidden'});
@@ -90,7 +103,7 @@ const server = http.createServer((req, res) => {
     const worlds = [];
     cdp.on('Runtime.executionContextCreated', event => worlds.push(event.context));
     await cdp.send('Runtime.enable');
-    const isolated = worlds.find(world => world.name === id);
+    const isolated = worlds.find(world => world.name === id || world.name === manifest.name);
     assert.ok(isolated, 'Extension isolated world exists');
     const access = await cdp.send('Runtime.evaluate', {
       contextId: isolated.id, awaitPromise: true, returnByValue: true,
