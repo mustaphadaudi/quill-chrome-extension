@@ -43,6 +43,10 @@ const server = http.createServer((req, res) => {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
+    await worker.evaluate(async () => {
+      await chrome.storage.local.set({apiKey:'browser-fixture-key'});
+      globalThis.fetch = async () => ({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({summary:'Fix verb agreement.',tone:'Neutral',rewrite:'',suggestions:[{original:'are',replacement:'is',explanation:'Singular subject.',category:'grammar',occurrence:0}]})}]}}]})});
+    });
     await page.goto(`http://127.0.0.1:${server.address().port}/tests/editor-fixture.html`);
     const host = page.locator('[data-quill-widget]');
     await page.locator('#plain').focus();
@@ -51,10 +55,7 @@ const server = http.createServer((req, res) => {
     await host.click();
     await page.screenshot({path: path.join(os.tmpdir(), 'quill-widget-qa.png')});
     console.log('PASS: real extension injected; widget opens; original text unchanged');
-    await worker.evaluate(async () => {
-      await chrome.storage.local.set({apiKey:'browser-fixture-key'});
-      globalThis.fetch = async () => ({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({summary:'Fix verb agreement.',tone:'Neutral',rewrite:'',suggestions:[{original:'are',replacement:'is',explanation:'Singular subject.',category:'grammar',occurrence:0}]})}]}}]})});
-    });
+
     await page.locator('#plain').focus();
     if (!(await host.locator('.check').isVisible())) await host.locator('.indicator').click();
     await host.locator('.check').click();
