@@ -28,23 +28,29 @@
   function render(){
     frame=0;if(!state)return;
     if(!state.field.isConnected||QuillEditors.read(state.field)!==state.full){clear();return;}
-    const area=clip(state.field);boxes=[];marks.replaceChildren();tip.hidden=true;current=null;
+    const previous=current,focused=root.activeElement?.classList.contains('mark');
+    const area=clip(state.field);boxes=[];marks.replaceChildren();
     for(const {edit,rects} of geometry(state.field,state.edits,state.start))for(const r of rects){
       const left=Math.max(r.left,area.left),right=Math.min(r.right,area.right),top=Math.max(r.top,area.top),bottom=Math.min(r.bottom,area.bottom);
       if(right<=left||bottom<=top||r.bottom>area.bottom+2)continue;
       const box={left,right,top,bottom,edit};boxes.push(box);
       const mark=document.createElement('button');mark.type='button';mark.className='mark';mark.setAttribute('aria-label',`Quill ${edit.category}: ${edit.original}. Suggested: ${edit.replacement||'delete'}`);
       mark.style.cssText=`left:${left}px;top:${bottom-1}px;width:${right-left}px`;
-      mark.addEventListener('focus',()=>open(box));mark.addEventListener('click',()=>open(box));marks.append(mark);
+      box.mark=mark;mark.addEventListener('focus',()=>open(box));mark.addEventListener('click',()=>open(box));marks.append(mark);
     }
+    const selected=boxes.find(box=>box.edit===previous);
+    if(selected){open(selected);if(focused)selected.mark.focus({preventScroll:true});}else{tip.hidden=true;current=null;}
   }
   function schedule(){if(state&&!frame)frame=requestAnimationFrame(render);}
   function open(box){
-    if(!state)return;clearTimeout(hideTimer);hideTimer=0;clearTimeout(hoverTimer);if(current===box.edit&&!tip.hidden)return;current=box.edit;
+    if(!state)return;clearTimeout(hideTimer);hideTimer=0;clearTimeout(hoverTimer);if(current===box.edit&&!tip.hidden){position(box);return;}current=box.edit;
     tip.replaceChildren();const kind=document.createElement('small'),before=document.createElement('del'),after=document.createElement('strong'),why=document.createElement('p');
     kind.textContent=box.edit.category;before.textContent=box.edit.original;after.textContent=box.edit.replacement||'(delete)';why.textContent=box.edit.explanation;
     const accept=document.createElement('button'),dismiss=document.createElement('button');accept.type=dismiss.type='button';accept.className='accept';dismiss.className='dismiss';accept.textContent='Accept';dismiss.textContent='Dismiss';
     accept.addEventListener('click',()=>state?.accept(box.edit));dismiss.addEventListener('click',()=>state?.dismiss(box.edit));tip.append(kind,before,after,why,accept,dismiss);tip.hidden=false;
+    position(box);
+  }
+  function position(box){
     const width=tip.getBoundingClientRect().width;tip.style.left=`${Math.max(8,Math.min(box.left,innerWidth-width-8))}px`;const height=tip.getBoundingClientRect().height;tip.style.top=`${box.bottom+height+14<innerHeight?box.bottom+8:Math.max(8,box.top-height-8)}px`;
   }
   document.addEventListener('pointermove',event=>{
