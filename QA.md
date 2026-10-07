@@ -83,3 +83,11 @@ The fix uses the body-path Text element consistently, sorts attribute keys and m
 Local backend/syntax QA passed after the regression initially failed on the old code. Chromium CI also exercises reordered attributes and the new diagnostic before key setup. Live Google Apps Script behaviour, Gemini output quality and in-document acceptance in the user's document are still unverified. This companion does not provide live Docs underlines or word-hover editing.
 
 The 0.1.1 update passed **19 backend/syntax test groups and the full Chromium suite**: https://github.com/mustaphadaudi/quill-chrome-extension/actions/runs/37613154836 . The actual sidebar plus simulated Google backend verified document diagnostics before key setup, reordered attribute maps, direct accept/apply-all, remaining suggestions, formatted Undo and stale-document rejection. Google APIs and Gemini remain mocked.
+
+## Chrome 0.6.0 / Docs companion 0.2.0
+
+Complete canvas capture, pure geometry mapping, isolated overlay, cross-frame companion bridge, optional live paragraph checking and guarded hover/click editing modules. The canvas layer observes drawing rather than modifying Google's renderer. Unique paragraph matching and server source/style guards reject ambiguous or stale edits.
+
+Local backend/syntax QA passes 23 test groups, covering multi-line offsets and canvas scaling, duplicate/stale/partial mapping rejection, no-key preference handling and tab/frame/document-scoped routing with worker restart. Chromium QA adds actual Canvas 2D rendering and an injected cross-origin sidebar running the real server code against DocumentApp fixtures. It covers hover/click Accept, Undo, remaining marks, Dismiss, scroll/resize/repaint sync, no scroll AI requests, typing invalidation and opt-in live checking.
+
+Live Docs canvas renderer compatibility, real Google iframe URLs/CSP, live AI output and live acceptance remain unverified. Worker/glyph/path renderers, RTL/rotated runs, repeated paragraphs and incomplete render mappings are not supported. This release must not be described as universal live Google Docs support.

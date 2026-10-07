@@ -1,3 +1,4 @@
+import './docs-bridge.js';
 import { getSettings, saveSettings, MODES } from '../shared/settings.js';
 import { generate, validateRequest, listModels } from './gemini.js';
 const ready = chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});

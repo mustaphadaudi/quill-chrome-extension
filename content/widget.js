@@ -28,7 +28,7 @@
     autoStatus(value){q('.auto').checked=value;},
     message(text){q('.status').textContent=text;},
     loading(value){for(const selector of ['.check','.rewrite','select'])q(selector).disabled=value;button.textContent=value?'…':'Q';},
-    docsMode(){q('.live').hidden=true;q('.intro').textContent='Google Docs: install the companion from docs-companion/ in the Quill repository, then open Docs → Quill → Open writing assistant. Until installed, use the writing pad.';q('.check').disabled=true;q('.rewrite').disabled=true;},
+    docsMode(){q('.live').hidden=true;q('.intro').textContent='Google Docs: install the companion from docs-companion/ in the Quill repository, then open Docs → Quill → Open writing assistant. Enable Inline corrections in the companion sidebar for red document markers and hover edits. Until installed, use the writing pad.';q('.check').disabled=true;q('.rewrite').disabled=true;},
     reset(){q('.live').hidden=false;q('.intro').textContent='Your words, a little clearer.';q('.results').replaceChildren();this.loading(false);this.message('Check this field or select a passage first.');},
     undoAvailable(value){q('.undo').disabled=!value;},
     result(result,onApply,onDismiss=()=>{}){

@@ -102,3 +102,9 @@ Visit `http://127.0.0.1:8765/tests/editor-fixture.html`. Test a check, an indivi
 Each development stage should be committed after its focused QA. See `QA.md` for actual results and outstanding checks. GitHub Actions repeats unit and browser tests on pushes and pull requests.
 
 Official references: https://ai.google.dev/gemini-api/docs/pricing · https://ai.google.dev/gemini-api/docs/structured-output · https://developer.chrome.com/docs/extensions/reference/api/storage
+
+## Chrome 0.6.0: Docs canvas overlay
+
+Install the complete extension build, reload Chrome extension and Docs, and update the bound Docs companion to 0.2.0 (Code.gs and Sidebar.html only). Open its **Inline corrections · Chrome** settings and enable red markers. Hover/click corrections are applied by the working Apps Script companion. Scroll/resize/repaint update visual geometry locally. Optional live checks send the current paragraph to Gemini after typing pauses.
+
+This integration depends on capturing Canvas 2D text draws. It is experimental until verified in your real Docs renderer; unavailable, repeated or ambiguous text hides markers with an explanation. See [complete setup, limitations and checklist](docs-companion/README.md#complete-020--chrome-060-update). Your sidebar must remain open. No additional OAuth scopes, public deployment or new API key are needed.

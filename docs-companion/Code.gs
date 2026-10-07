@@ -1,16 +1,20 @@
 /** @OnlyCurrentDoc */
-const QUILL_DOCS = {version:'0.1.1', model:'gemini-3.5-flash-lite', ttl:1800, maxNode:24000};
+const QUILL_DOCS = {version:'0.2.0', model:'gemini-3.5-flash-lite', ttl:1800, maxNode:24000};
 function onOpen(){DocumentApp.getUi().createMenu('Quill').addItem('Open writing assistant','showQuill').addToUi();}
 function showQuill(){DocumentApp.getUi().showSidebar(HtmlService.createHtmlOutputFromFile('Sidebar').setTitle('Quill · personal writing assistant'));}
 function docsSettings(){
   const props=PropertiesService.getUserProperties();
-  return {hasKey:!!props.getProperty('quillKey'),model:props.getProperty('quillModel')||QUILL_DOCS.model,language:props.getProperty('quillLanguage')||'en-GB',version:QUILL_DOCS.version};
+  return {hasKey:!!props.getProperty('quillKey'),model:props.getProperty('quillModel')||QUILL_DOCS.model,language:props.getProperty('quillLanguage')||'en-GB',version:QUILL_DOCS.version,docId:DocumentApp.getActiveDocument().getId(),inlineEnabled:props.getProperty('quillInline')==='true',liveEnabled:props.getProperty('quillLive')==='true'};
 }
 function docsSaveSettings(input){
   if(!input||!/^gemini-[a-z0-9.-]+$/.test(input.model)||!['en-GB','en-US'].includes(input.language))throw new Error('Enter a valid model and English variant.');
   const key=typeof input.key==='string'?input.key.trim():'';if(key&&/\s/.test(key))throw new Error('The key must not contain spaces.');
   const props=PropertiesService.getUserProperties();props.setProperties({quillModel:input.model,quillLanguage:input.language});if(key)props.setProperty('quillKey',key);
   return docsSettings();
+}
+function docsSaveInline(input){
+  if(!input||typeof input.enabled!=='boolean'||typeof input.live!=='boolean')throw new Error('Invalid inline preferences.');
+  PropertiesService.getUserProperties().setProperties({quillInline:String(input.enabled),quillLive:String(input.enabled&&input.live)});return docsSettings();
 }
 function docsRemoveKey(){PropertiesService.getUserProperties().deleteProperty('quillKey');return docsSettings();}
 function docsTestDocument(){
@@ -158,7 +162,12 @@ function docsLoad_(token){
   if(typeof token!=='string'||!/^[a-z0-9-]{36}$/i.test(token))throw new Error('Invalid check session.');
   const value=CacheService.getUserCache().get('quill:'+token);if(!value)throw new Error('This check expired. Check the passage again.');return JSON.parse(value);
 }
-function docsPublic_(token,session){return {token,text:session.snap.text,summary:session.result.summary,tone:session.result.tone,rewrite:session.result.rewrite,suggestions:session.remaining,canUndo:!!session.undo};}
+function docsPublic_(token,session){
+  const snap=session.snap,normalize=text=>text.replace(/[\s\u00a0]+/g,' ').trim(),full=normalize(snap.full);
+  const body=DocumentApp.getActiveDocument().getActiveTab().asDocumentTab().getBody();
+  const unique=!!full&&normalize(body.getText()).split(full).length===2;
+  return {token,text:snap.text,summary:session.result.summary,tone:session.result.tone,rewrite:session.result.rewrite,suggestions:session.remaining,canUndo:!!session.undo,anchor:{docId:snap.docId,tabId:snap.tabId,full:snap.full,start:snap.start,end:snap.end,unique}};
+}
 function docsGenerate_(text,mode){
   validateRequest(text,mode);const settings=docsSettings(),props=PropertiesService.getUserProperties(),key=props.getProperty('quillKey');if(!key)throw new Error('Save your Gemini API key in the sidebar settings first.');
   const until=Number(props.getProperty('quillCooldown')||0);if(Date.now()<until)throw new Error('Gemini is cooling down after a quota error. Wait a minute.');

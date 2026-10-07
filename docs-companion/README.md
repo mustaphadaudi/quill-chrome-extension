@@ -1,4 +1,4 @@
-# Quill for Google Docs — personal companion 0.1.1
+# Quill for Google Docs — personal companion 0.2.0
 
 A native Google Docs sidebar that checks a selected passage or the paragraph containing your cursor, then applies accepted corrections directly in the document. Vanilla HTML/CSS/JavaScript UI and a Google Apps Script backend. Uses your personal Gemini key. No subscriptions, upgrade prompts, public web app or billing configuration.
 
@@ -20,6 +20,32 @@ This is a separate companion to the Chrome extension. Installing or reloading th
 **Do not click Deploy or create a public web app.** Neither is needed for this document-bound personal version. No Google Cloud OAuth client ID, Chrome extension ID or separate server is required.
 
 The files are also available from the repository's `docs-companion/` directory after **Code → Download ZIP**. Copy full file contents, without Markdown code fences or the filename, into Apps Script. All four files are required.
+
+## Complete 0.2.0 / Chrome 0.6.0 update
+
+Replace **Code.gs** and **Sidebar.html** in the existing Apps Script project, save and reopen the sidebar. Keep Engine.gs and appsscript.json unchanged. Replace the Chrome extension directory with the complete 0.6.0 build and reload it in chrome://extensions. **Reload the Google Docs page**: canvas observation must start before Docs paints its text. The sidebar footer must read **Quill Docs 0.2.0** and Chrome must show **0.6.0**.
+
+Open **Inline corrections · Chrome** in the sidebar and enable **Show red inline markers**. Check a selection or paragraph. Hover or click a marked word to Accept or Dismiss; the action goes through the sidebar's guarded Apps Script editing functions. Remaining suggestions are rebased without another AI call. The card offers Undo after an edit when another suggestion is available; sidebar Undo remains available even after resolving the last suggestion.
+
+Optional **Check current paragraph after typing** checks the paragraph at the cursor after a 1.8-second typing pause. This sends the current paragraph to Gemini and consumes its quota. Both inline and live preferences default off and are saved per script/user. Keep the sidebar open. Manual checks and editing still work if inline mapping is unavailable.
+
+The local overlay observes Canvas 2D text draws, transforms, clear/repaint operations and canvas image copies. A fixed transparent canvas draws red waves; focusable hit regions open the correction card. Markers use actual canvas bounds, measured text prefixes and canvas-to-CSS scaling, and are recalculated on scroll, zoom/resize, DOM layout changes, font loading and repaint. Scrolling alone never calls Gemini. Draw data stays in bounded page memory and is not sent to Gemini. No Google internals are edited or vendor extension IDs spoofed.
+
+**Renderer-dependent experimental integration:** real Docs may draw text in workers, as glyph images/paths, or through inaccessible render surfaces. Those renderers are not supported by this observer. The checked Text element must be uniquely identifiable in the active tab body and fully represented in captured draw runs. Repeated paragraphs, ambiguous/missing matches, clipped words, rotated or right-to-left runs hide markers and show a sidebar explanation. Partially visible long paragraphs may need more of the paragraph rendered before mapping succeeds. A document-tab switch must be followed by a fresh check. This is not a claim of universal Grammarly compatibility.
+
+The frame bridge allows only accept/dismiss/undo and explicitly enabled live checks. It is scoped to the same Chrome tab, document ID and frame/document IDs; it carries checked paragraph text, suggestions and a temporary check token, never your key. Routing metadata is held in Chrome session storage and removed on tab close. Sidebar closure/disconnection removes markers within 45 seconds; turning inline off removes them immediately. A personal document's script editors remain trusted, as described below.
+
+Quick verification:
+
+1. Enable inline markers, check a short uniquely worded paragraph containing `This are a test sentence.` and confirm the sidebar reports a mapped suggestion.
+2. Hover/click **are**, accept **is**, and inspect the actual document. Try Undo from the sidebar or a remaining-error hover card.
+3. Check a paragraph with several mistakes, accept the first and confirm the remaining red markers move to their corrected offsets without rechecking.
+4. Scroll the Docs editor, resize Chrome, change Docs zoom, and wait for any repaint. Markers must move with the words; the card must remain next to its target or close when the target disappears.
+5. Type with live checking off: markers must disappear and no new check starts. Enable live checking, type in a paragraph, pause and confirm the paragraph is rechecked.
+6. Duplicate the exact paragraph elsewhere in the active tab: the sidebar must explain that inline matching is ambiguous; corrections remain available in the sidebar. Clear/replace rendered text or switch tabs; stale hover edits must not silently apply.
+7. Disable inline markers or pause the Chrome extension: markers disappear. Close/reopen the sidebar and verify reconnection. If **No canvas text captured** persists after a full Docs reload, use sidebar edits and report that exact status; the renderer cannot be treated as supported.
+
+Automated QA uses the real extension and real canvas drawing with a cross-origin sidebar fixture and simulated DocumentApp/Gemini. It does not establish compatibility with your live Docs renderer or real AI output.
 
 ## Update from 0.1.0 (formatting error fix)
 
@@ -48,7 +74,7 @@ The capture must resolve to one actual Docs Text element, normally a single para
 
 The passage limit is 12,000 characters. The full containing text element is limited to 24,000 characters, and heavily formatted state exceeding the cache budget is rejected before edits. Paragraph-break insertion and multi-paragraph rewrites are not supported. A replacement inherits the formatting of the first replaced character; formatting outside that exact range is retained. Undo restores the original styles within the changed ranges.
 
-There are no live red underlines inside the Docs canvas, hover cards on document words, automatic checking on each keystroke, or whole-document scanning. Those features are not implied by direct sidebar editing.
+The Chrome 0.6.0 overlay adds renderer-dependent inline markers, hover cards and optional debounced current-paragraph checks as described above. Whole-document scanning and multi-paragraph corrections are not implemented. Sidebar-only installation does not install the Chrome overlay.
 
 Before applying or undoing, the server checks the document identity, active tab, body-text fingerprint, target node text and target formatting. A script lock serializes companion actions, but does **not** lock out human collaborators or make multiple Apps Script edits an atomic transaction. Avoid concurrent typing while applying changes. If a write fails midway, the UI asks you to review the document; some changes may already have been applied. Live Docs acceptance and undo behaviour must be verified before relying on it for important work.
 

@@ -54,6 +54,6 @@ test('unchanged formatting survives reordered Google attribute maps and redundan
  const next=f.api.docsCheck({scope:'selection',mode:'check'});f.node.attributes[20].LINK_URL='https://changed.example';assert.throws(()=>f.api.docsChange(next.token,'all'),/formatting changed/);assert.equal(f.node.getText(),original);
 });
 test('document diagnostic works without a key, API quota or mutations and reports unsupported selections',()=>{
- const f=fixture();f.api.docsRemoveKey();const before=JSON.stringify(f.node.attributes),result=f.api.docsTestDocument();assert.match(result.message,/Quill Docs 0\.1\.1.*Document access passed/);assert.equal(f.calls.length,0);assert.equal(f.cache.size,0);assert.equal(f.node.getText(),original);assert.equal(JSON.stringify(f.node.attributes),before);
+ const f=fixture();f.api.docsRemoveKey();const before=JSON.stringify(f.node.attributes),result=f.api.docsTestDocument();assert.match(result.message,/Quill Docs 0\.2\.0.*Document access passed/);assert.equal(f.calls.length,0);assert.equal(f.cache.size,0);assert.equal(f.node.getText(),original);assert.equal(JSON.stringify(f.node.attributes),before);
  const doc=f.api.DocumentApp.getActiveDocument(),selection=doc.getSelection;doc.getSelection=()=>null;assert.match(f.api.docsTestDocument().message,/paragraph/);doc.getSelection=selection;f.setScope('multiple');assert.throws(()=>f.api.docsTestDocument(),/one paragraph/);assert.equal(f.calls.length,0);
 });

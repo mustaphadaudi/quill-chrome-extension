@@ -1,10 +1,10 @@
 {
   "name": "quill-chrome-extension",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/core.test.mjs tests/docs-companion.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/docs-companion.test.mjs tests/docs-visual.test.mjs",
     "test:browser": "node tests/smoke.cjs"
   },
   "devDependencies": {
