@@ -28,12 +28,18 @@
   function render(){
     frame=0;if(!state)return;
     if(!state.field.isConnected||QuillEditors.read(state.field)!==state.full){clear();return;}
-    const previous=current,focused=root.activeElement?.classList.contains('mark');
-    const area=clip(state.field);boxes=[];marks.replaceChildren();
+    const area=clip(state.field),measured=[];
     for(const {edit,rects} of geometry(state.field,state.edits,state.start))for(const r of rects){
       const left=Math.max(r.left,area.left),right=Math.min(r.right,area.right),top=Math.max(r.top,area.top),bottom=Math.min(r.bottom,area.bottom);
       if(right<=left||bottom<=top||r.bottom>area.bottom+2)continue;
-      const box={left,right,top,bottom,edit};boxes.push(box);
+      measured.push({left,right,top,bottom,edit});
+    }
+    // Keep existing buttons and focus when an observer reports unchanged layout.
+    if(measured.length===boxes.length&&measured.every((box,i)=>['left','right','top','bottom','edit'].every(key=>box[key]===boxes[i][key])))return;
+    const previous=current,focused=root.activeElement?.classList.contains('mark');
+    boxes=measured;marks.replaceChildren();
+    for(const box of boxes){
+      const {edit,left,right,bottom}=box;
       const mark=document.createElement('button');mark.type='button';mark.className='mark';mark.setAttribute('aria-label',`Quill ${edit.category}: ${edit.original}. Suggested: ${edit.replacement||'delete'}`);
       mark.style.cssText=`left:${left}px;top:${bottom-1}px;width:${right-left}px`;
       box.mark=mark;mark.addEventListener('focus',()=>open(box));mark.addEventListener('click',()=>open(box));marks.append(mark);

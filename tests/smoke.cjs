@@ -61,7 +61,7 @@ const server = http.createServer((req, res) => {
     await host.locator('.check').click();
     await host.locator('.accept').waitFor();
     const ink=page.locator('[data-quill-highlights]');await ink.locator('.mark').waitFor();
-    const line=await ink.locator('.mark').first().boundingBox();assert.ok(line.width>10);
+    const line=await ink.locator('.mark').first().evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width};});assert.ok(line.width>10);
     await page.mouse.move(line.x+line.width/2,line.y-5);await ink.locator('.tip').waitFor({state:'visible'});
     assert.equal(await ink.locator('.tip strong').textContent(),'is');await ink.locator('.tip .accept').click();
     assert.equal(await ink.locator('.mark').count(),0);
