@@ -28,8 +28,8 @@
     autoStatus(value){q('.auto').checked=value;},
     message(text){q('.status').textContent=text;},
     loading(value){for(const selector of ['.check','.rewrite','select'])q(selector).disabled=value;button.textContent=value?'…':'Q';},
-    docsMode(){q('.intro').textContent='Google Docs: copy your passage into the writing pad, then paste the correction back.';q('.check').disabled=true;q('.rewrite').disabled=true;},
-    reset(){q('.intro').textContent='Your words, a little clearer.';q('.results').replaceChildren();this.loading(false);this.message('Check this field or select a passage first.');},
+    docsMode(){q('.live').hidden=true;q('.intro').textContent='Google Docs: copy your passage into the writing pad, then paste the correction back.';q('.check').disabled=true;q('.rewrite').disabled=true;},
+    reset(){q('.live').hidden=false;q('.intro').textContent='Your words, a little clearer.';q('.results').replaceChildren();this.loading(false);this.message('Check this field or select a passage first.');},
     undoAvailable(value){q('.undo').disabled=!value;},
     result(result,onApply,onDismiss=()=>{}){
       const container=q('.results');container.replaceChildren();

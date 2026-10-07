@@ -48,7 +48,7 @@ test('editor selection replacement, undo, stale-result guard and password exclus
  class Textarea extends Input{get value(){return this._value;}set value(v){this._value=v;}}
  const widget={bind:x=>handlers=x,reset(){},loading(){},message(){},open(){},hide(){},show(){},undoAvailable(){},owns:()=>false,result:(r,fn)=>applier=fn};
  const sandbox={location:{hostname:'example.com',pathname:'/'},HTMLElement:Element,HTMLInputElement:Input,HTMLTextAreaElement:Textarea,QuillWidget:widget,ResizeObserver:class{observe(){}disconnect(){}},InputEvent:class{},Event:class{},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,window:{addEventListener(){}},document:{activeElement:null,addEventListener:(name,fn)=>events[name]=fn},chrome:{storage:{onChanged:{addListener(){}}},runtime:{onMessage:{addListener(){}},sendMessage:async message=>message.type==='QUILL_GET_STATUS'?{ok:true,settings:{enabled:true,autoCheck:false}}:pending?await pending:{ok:true,result:validateResult(response,source,'check')}}}};
- vm.runInNewContext(fs.readFileSync(path.join(project,'content/adapters.js'),'utf8'),sandbox);vm.runInNewContext(fs.readFileSync(path.join(project,'content/editor.js'),'utf8'),sandbox);const flush=()=>new Promise(resolve=>setImmediate(resolve));await flush();
+ vm.runInNewContext(fs.readFileSync(path.join(project,'shared/suggestions.js'),'utf8'),sandbox);vm.runInNewContext(fs.readFileSync(path.join(project,'content/adapters.js'),'utf8'),sandbox);vm.runInNewContext(fs.readFileSync(path.join(project,'content/editor.js'),'utf8'),sandbox);const flush=()=>new Promise(resolve=>setImmediate(resolve));await flush();
  const field=new Textarea();field.value='Before '+source+' After';field.selectionStart=7;field.selectionEnd=7+source.length;events.focusin({target:field});await flush();await handlers.run('check');applier({suggestions:validateResult(response,source,'check').suggestions});assert.equal(field.value,'Before I have a idea. I have plans. After');handlers.undo();assert.equal(field.value,'Before '+source+' After');
  await handlers.run('check');field.value='I typed more';applier({suggestions:validateResult(response,source,'check').suggestions});assert.equal(field.value,'I typed more');let resolve;pending=new Promise(r=>resolve=r);const request=handlers.run('check');events.input({target:field});applier=null;resolve({ok:true,result:response});await request;assert.equal(applier,null);const password=new Input();password.type='password';events.focusin({target:password});await flush();pending=null;await handlers.run('check');assert.equal(applier,null);
 });
@@ -68,4 +68,14 @@ test('API diagnostics retain provider reason but redact the key and source',asyn
   assert.match(error.message,/HTTP 404; gemini-2.5-flash-lite; v1beta/);assert.match(error.message,/NOT_FOUND: Model access disabled/);assert.ok(!error.message.includes(key));assert.ok(!error.message.includes(source));return true;
  });
  let config;await generate({text:source,mode:'check',settings:{...settings,model:'gemini-3.5-flash-lite'},apiKey:key,fetcher:async(url,options)=>{config=JSON.parse(options.body).generationConfig;return success(response);}});assert.equal(config.temperature,1);
+});
+
+test('remaining suggestions shift safely after growth, shrinkage, deletion and repeated words',()=>{
+ const sandbox={};vm.runInNewContext(fs.readFileSync(path.join(project,'shared/suggestions.js'),'utf8'),sandbox);const {rebase}=sandbox.QuillSuggestions;
+ const before='I has a idea. teh plan.';
+ const edits=[{start:2,end:5,original:'has',replacement:'have'},{start:6,end:7,original:'a',replacement:'an'},{start:14,end:17,original:'teh',replacement:'the'}];
+ const next=applyEdits(before,[edits[0]]),rest=rebase(before,next,edits,[edits[0]]);assert.equal(rest.length,2);assert.equal(rest[0].start,7);assert.equal(rest[1].start,15);assert.equal(applyEdits(next,rest),'I have an idea. the plan.');
+ const again='bad bad bad',repeated=[0,4,8].map(start=>({start,end:start+3,original:'bad',replacement:'good'}));const last=applyEdits(again,[repeated[1]]);assert.deepEqual(Array.from(rebase(again,last,repeated,[repeated[1]]),x=>x.start),[0,9]);
+ const shrink=[{start:0,end:4,original:'very',replacement:''},{start:5,end:8,original:'bad',replacement:'good'}];assert.equal(rebase('very bad',' bad',shrink,[shrink[0]])[0].start,1);
+ assert.throws(()=>rebase(before,'unexpected',edits,[edits[0]]),/unexpectedly/);assert.throws(()=>rebase('different',next,edits,[edits[0]]),/text changed/);
 });

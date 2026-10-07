@@ -40,7 +40,8 @@
       if(typeof change.rewrite==='string'){record.undoStates.push(snap.full);adapters.replace(snap.field,snap.start,snap.end,passage);}
       else{for(const edit of [...change.suggestions].sort((a,b)=>b.start-a.start)){record.undoStates.push(adapters.read(snap.field));adapters.replace(snap.field,snap.start+edit.start,snap.start+edit.end,edit.replacement);}}
       undo=record;
-      epoch++;clearTimeout(timer);highlights.clear();widget.reset();widget.undoAvailable(true);widget.message('Applied. Check again for updated suggestions, or undo.');
+      epoch++;clearTimeout(timer);highlights.clear();widget.reset();widget.undoAvailable(true);widget.message('Applied.');
+      return {...snap,full:next,text:passage,end:snap.start+passage.length};
     }catch(error){widget.message(error.message);}
   }
   async function run(mode,automatic=false){
@@ -55,9 +56,15 @@
       if(!response?.ok)throw new Error(response?.error||'No response. Reload the extension and page.');
       widget.loading(false);
       let remaining=[...response.result.suggestions];
+      const accept=change=>{
+        const previous=snap,next=apply(snap,change);if(!next)return;
+        if(typeof change.rewrite==='string')return;
+        remaining=QuillSuggestions.rebase(previous.text,next.text,remaining,change.suggestions);snap=next;show();widget.undoAvailable(true);
+        widget.message(remaining.length?`Applied. ${remaining.length} suggestion${remaining.length===1?'':'s'} remaining.`:'All current suggestions resolved.');
+      };
       const show=()=>{
-        widget.result({...response.result,suggestions:remaining},change=>apply(snap,change),dismiss);
-        highlights.show(snap,remaining,edit=>apply(snap,{suggestions:[edit]}),dismiss);
+        widget.result({...response.result,suggestions:remaining},accept,dismiss);
+        highlights.show(snap,remaining,edit=>accept({suggestions:[edit]}),dismiss);
       };
       const dismiss=edit=>{remaining=remaining.filter(item=>item!==edit);show();};
       show();
