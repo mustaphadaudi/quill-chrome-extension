@@ -5,7 +5,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {generate,validateRequest,validateResult,applyEdits,MAX_TEXT} from '../background/gemini.js';
+import {generate,validateRequest,validateResult,applyEdits,MAX_TEXT,listModels} from '../background/gemini.js';
 const project=fileURLToPath(new URL('../',import.meta.url));
 const source='I has a idea. I has plans.';
 const response={summary:'Two grammar edits.',tone:'Neutral',rewrite:'',suggestions:[0,1].map(occurrence=>({original:'has',replacement:'have',explanation:'Subject agreement.',category:'grammar',occurrence}))};
@@ -47,8 +47,17 @@ test('editor selection replacement, undo, stale-result guard and password exclus
  class Input extends Element{constructor(){super();this.type='text';this._value='';}get value(){return this._value;}set value(v){this._value=v;}}
  class Textarea extends Input{get value(){return this._value;}set value(v){this._value=v;}}
  const widget={bind:x=>handlers=x,reset(){},loading(){},message(){},open(){},hide(){},show(){},undoAvailable(){},owns:()=>false,result:(r,fn)=>applier=fn};
- const sandbox={HTMLElement:Element,HTMLInputElement:Input,HTMLTextAreaElement:Textarea,QuillWidget:widget,ResizeObserver:class{observe(){}disconnect(){}},InputEvent:class{},Event:class{},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,window:{addEventListener(){}},document:{activeElement:null,addEventListener:(name,fn)=>events[name]=fn},chrome:{storage:{onChanged:{addListener(){}}},runtime:{onMessage:{addListener(){}},sendMessage:async message=>message.type==='QUILL_GET_STATUS'?{ok:true,settings:{enabled:true,autoCheck:false}}:pending?await pending:{ok:true,result:validateResult(response,source,'check')}}}};
- vm.runInNewContext(fs.readFileSync(path.join(project,'content/editor.js'),'utf8'),sandbox);const flush=()=>new Promise(resolve=>setImmediate(resolve));await flush();
+ const sandbox={location:{hostname:'example.com',pathname:'/'},HTMLElement:Element,HTMLInputElement:Input,HTMLTextAreaElement:Textarea,QuillWidget:widget,ResizeObserver:class{observe(){}disconnect(){}},InputEvent:class{},Event:class{},setTimeout:()=>1,clearTimeout(){},requestAnimationFrame:()=>1,window:{addEventListener(){}},document:{activeElement:null,addEventListener:(name,fn)=>events[name]=fn},chrome:{storage:{onChanged:{addListener(){}}},runtime:{onMessage:{addListener(){}},sendMessage:async message=>message.type==='QUILL_GET_STATUS'?{ok:true,settings:{enabled:true,autoCheck:false}}:pending?await pending:{ok:true,result:validateResult(response,source,'check')}}}};
+ vm.runInNewContext(fs.readFileSync(path.join(project,'content/adapters.js'),'utf8'),sandbox);vm.runInNewContext(fs.readFileSync(path.join(project,'content/editor.js'),'utf8'),sandbox);const flush=()=>new Promise(resolve=>setImmediate(resolve));await flush();
  const field=new Textarea();field.value='Before '+source+' After';field.selectionStart=7;field.selectionEnd=7+source.length;events.focusin({target:field});await flush();await handlers.run('check');applier({suggestions:validateResult(response,source,'check').suggestions});assert.equal(field.value,'Before I have a idea. I have plans. After');handlers.undo();assert.equal(field.value,'Before '+source+' After');
  await handlers.run('check');field.value='I typed more';applier({suggestions:validateResult(response,source,'check').suggestions});assert.equal(field.value,'I typed more');let resolve;pending=new Promise(r=>resolve=r);const request=handlers.run('check');events.input({target:field});applier=null;resolve({ok:true,result:response});await request;assert.equal(applier,null);const password=new Input();password.type='password';events.focusin({target:password});await flush();pending=null;await handlers.run('check');assert.equal(applier,null);
+});
+
+test('model discovery paginates, filters text generation, and never puts key in URL',async()=>{
+ let calls=0;
+ const models=await listModels('fixture-key',async(url,options)=>{
+  assert.ok(!url.includes('fixture-key'));assert.equal(options.headers['x-goog-api-key'],'fixture-key');calls++;
+  return {ok:true,json:async()=>calls===1?{models:[{name:'models/gemini-test-flash',supportedGenerationMethods:['generateContent']},{name:'models/gemini-test-image',supportedGenerationMethods:['generateContent']}],nextPageToken:'next'}:{models:[{name:'models/gemini-test-flash-lite',displayName:'Lite',supportedGenerationMethods:['generateContent']},{name:'models/embedding-test',supportedGenerationMethods:['embedContent']}]}};
+ });assert.equal(calls,2);assert.deepEqual(models.map(x=>x.id),['gemini-test-flash','gemini-test-flash-lite']);
+ await assert.rejects(listModels(''),/Save your API key/);
 });

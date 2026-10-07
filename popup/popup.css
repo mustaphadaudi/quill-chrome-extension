@@ -27,3 +27,5 @@ footer { display: flex; justify-content: space-between; border-top: 1px solid #e
 @media (prefers-reduced-motion: reduce) { .switch span::after { transition: none; } }
 
 #settings{width:100%;padding:10px;margin-top:16px;border:1px solid #d8e9e0;border-radius:8px;background:white;color:#12865b;font:inherit;cursor:pointer}
+
+#pad{width:100%;padding:10px;margin-top:16px;border:1px solid #d8e9e0;border-radius:8px;background:#12865b;color:white;font:inherit;cursor:pointer}

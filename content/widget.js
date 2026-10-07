@@ -1,12 +1,13 @@
 (() => {
   const host = document.createElement('div');host.setAttribute('data-quill-widget','');
   host.style.cssText='all:initial!important;position:fixed!important;z-index:2147483647!important;display:none!important;';
-  const root=host.attachShadow({mode:'open'});
+  const root=host.attachShadow({mode:'open',delegatesFocus:true});
+  host.addEventListener('pointerdown',event=>event.stopPropagation());
   const css=document.createElement('link');css.rel='stylesheet';css.href=chrome.runtime.getURL('content/widget.css');
   const button=document.createElement('button');button.className='indicator';button.type='button';button.textContent='Q';button.setAttribute('aria-label','Open Quill writing assistant');button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','quill-card');
   const card=document.createElement('section');card.id='quill-card';card.hidden=true;card.setAttribute('aria-label','Quill writing assistant');
   // Static local markup only. Every model-generated string below uses textContent.
-  card.innerHTML='<header><strong>Quill</strong><button class="close" type="button" aria-label="Close suggestions">×</button></header><p class="intro">Your words, a little clearer.</p><div class="actions"><button class="primary check" type="button">Check writing</button><button class="settings" type="button" aria-label="Open Quill settings">⚙</button></div><div class="rewrite-controls"><select aria-label="Rewrite style"><option value="clearer">Clearer</option><option value="concise">More concise</option><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="confident">Confident</option></select><button class="rewrite" type="button">Rewrite</button></div><p class="status" role="status" aria-live="polite">Check this field or select a passage first.</p><div class="results"></div><footer><button class="undo" type="button" disabled>Undo last edit</button><span>Personal edition</span></footer>';
+  card.innerHTML='<header><strong>Quill</strong><button class="close" type="button" aria-label="Close suggestions">×</button></header><p class="intro">Your words, a little clearer.</p><div class="actions"><button class="primary check" type="button">Check writing</button><button class="settings" type="button" aria-label="Open Quill settings">⚙</button></div><div class="rewrite-controls"><select aria-label="Rewrite style"><option value="clearer">Clearer</option><option value="concise">More concise</option><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="confident">Confident</option></select><button class="rewrite" type="button">Rewrite</button></div><p class="status" role="status" aria-live="polite">Check this field or select a passage first.</p><div class="results"></div><button class="pad" type="button">Open writing pad ↗</button><footer><button class="undo" type="button" disabled>Undo last edit</button><span>Personal edition</span></footer>';
   root.append(css,card,button);
   const q=selector=>card.querySelector(selector);
   let handlers={};
@@ -16,6 +17,7 @@
   q('.check').addEventListener('click',()=>handlers.run?.('check'));
   q('.rewrite').addEventListener('click',()=>handlers.run?.(q('select').value));
   q('.settings').addEventListener('click',()=>handlers.settings?.());
+  q('.pad').addEventListener('click',()=>handlers.pad?.());
   q('.undo').addEventListener('click',()=>handlers.undo?.());
   root.addEventListener('keydown',event=>{if(event.key==='Escape'){setOpen(false);button.focus();}});
   document.addEventListener('pointerdown',event=>{if(!event.composedPath().includes(host))setOpen(false);},true);
@@ -24,7 +26,8 @@
     bind(next){handlers=next;},
     message(text){q('.status').textContent=text;},
     loading(value){for(const selector of ['.check','.rewrite','select'])q(selector).disabled=value;button.textContent=value?'…':'Q';},
-    reset(){q('.results').replaceChildren();this.loading(false);this.message('Check this field or select a passage first.');},
+    docsMode(){q('.intro').textContent='Google Docs: copy your passage into the writing pad, then paste the correction back.';q('.check').disabled=true;q('.rewrite').disabled=true;},
+    reset(){q('.intro').textContent='Your words, a little clearer.';q('.results').replaceChildren();this.loading(false);this.message('Check this field or select a passage first.');},
     undoAvailable(value){q('.undo').disabled=!value;},
     result(result,onApply){
       const container=q('.results');container.replaceChildren();

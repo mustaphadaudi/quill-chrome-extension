@@ -22,3 +22,19 @@ $('remove').addEventListener('click',async () => {
   try {await chrome.storage.local.remove('apiKey');$('apiKey').value='';await keyStatus();$('status').textContent='Saved key removed.';}
   catch {$('status').textContent='Could not remove the key.';}
 });
+
+$('available').addEventListener('change',()=>{if($('available').value)$('model').value=$('available').value;});
+$('discover').addEventListener('click',async()=>{
+  $('discover').disabled=true;$('status').textContent='Loading models visible to your saved key…';
+  try{
+    const response=await chrome.runtime.sendMessage({type:'QUILL_LIST_MODELS'});if(!response?.ok)throw new Error(response?.error||'Could not load models.');
+    $('available').replaceChildren(new Option('Choose an available model',''));
+    for(const model of response.models)$('available').append(new Option(model.name+' ('+model.id+')',model.id));
+    $('status').textContent=response.models.length?'Choose a model, save preferences, then test the connection.':'No Flash text models were returned for this key.';
+  }catch(error){$('status').textContent=error.message;}finally{$('discover').disabled=false;}
+});
+$('test').addEventListener('click',async()=>{
+  $('test').disabled=true;$('status').textContent='Testing the saved model with a short sample…';
+  try{const response=await chrome.runtime.sendMessage({type:'QUILL_TEST_CONNECTION'});if(!response?.ok)throw new Error(response?.error||'Test failed.');$('status').textContent='Connected: the saved key and model successfully checked a sample sentence.';}
+  catch(error){$('status').textContent=error.message;}finally{$('test').disabled=false;}
+});

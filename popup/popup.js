@@ -26,3 +26,5 @@ enabled.addEventListener("change", async () => {
 });
 
 document.getElementById("settings").addEventListener("click",()=>chrome.runtime.openOptionsPage());
+
+document.getElementById('pad').addEventListener('click',()=>chrome.runtime.sendMessage({type:'QUILL_OPEN_PAD'}));

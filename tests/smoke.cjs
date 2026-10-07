@@ -73,6 +73,28 @@ const server = http.createServer((req, res) => {
     await page.locator('#add').click();
     await host.waitFor({state: 'visible'});
     console.log('PASS: dynamically created textarea supported');
+    await page.locator('#rich').focus();await host.waitFor({state:'visible'});
+    if(!(await host.locator('.check').isVisible()))await host.locator('.indicator').click();
+    await host.locator('.check').click();await host.locator('.accept').waitFor();await host.locator('.accept').click();
+    assert.equal(await page.locator('#rich').innerText(),'This is a test sentence.\nSecond paragraph.');
+    assert.equal(await page.locator('#rich strong').textContent(),'test');
+    await host.locator('.undo').click();assert.equal(await page.locator('#rich strong').textContent(),'test');assert.ok((await page.locator('#rich').innerText()).startsWith('This are'));
+    await page.locator('#shadow-rich').focus();await host.waitFor({state:'visible'});
+    if(!(await host.locator('.check').isVisible()))await host.locator('.indicator').click();
+    await host.locator('.check').click();await host.locator('.accept').waitFor();await host.locator('.accept').click();
+    assert.equal(await page.locator('#shadow-rich').innerText(),'This is a shadow test sentence.');
+    await page.locator('#search').focus();await host.waitFor({state:'visible'});
+    const framed=page.frameLocator('#frame');await framed.locator('#embedded').focus();
+    await framed.locator('[data-quill-widget]').waitFor({state:'visible'});
+    console.log('PASS: rich text with formatting and undo, shadow-root editor, search input and iframe');
+    const pad=await context.newPage();await pad.goto(`chrome-extension://${id}/workbench/workbench.html`);
+    await pad.locator('#source').fill('This are a pad test sentence.');await pad.locator('#check').click();await pad.locator('#results article button').first().click();
+    assert.equal(await pad.locator('#source').inputValue(),'This is a pad test sentence.');await pad.locator('#undo').click();assert.equal(await pad.locator('#source').inputValue(),'This are a pad test sentence.');await pad.close();
+    const docs=await context.newPage();await docs.route('https://docs.google.com/document/d/quill-fixture/edit',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Docs canvas fixture</title><canvas width="500" height="200"></canvas>'}));
+    await docs.goto('https://docs.google.com/document/d/quill-fixture/edit');await docs.locator('[data-quill-widget]').waitFor({state:'visible'});await docs.locator('[data-quill-widget] .indicator').click();await docs.locator('[data-quill-widget] .pad').waitFor({state:'visible'});assert.equal(await docs.locator('[data-quill-widget] .check').isDisabled(),true);await docs.close();
+    console.log('PASS: writing pad checks and undo; persistent Docs button without a text input');
+    await page.locator('#draft').focus();
+
     const popup = await context.newPage();
     popup.on('pageerror', error => errors.push(error.message));
     await popup.goto(`chrome-extension://${id}/popup/popup.html`);

@@ -64,3 +64,17 @@ export async function generate({text, mode, settings, apiKey, fetcher = fetch}) 
   catch { throw new Error('Gemini returned an unreadable response. Please try again.'); }
   return validateResult(data, text, mode);
 }
+
+export async function listModels(apiKey, fetcher=fetch) {
+  if(!apiKey)throw new Error('Save your API key first.');
+  const available=[];let token='';
+  do {
+    const url=new URL('https://generativelanguage.googleapis.com/v1beta/models');url.searchParams.set('pageSize','1000');if(token)url.searchParams.set('pageToken',token);
+    let response;try{response=await fetcher(url.href,{headers:{'x-goog-api-key':apiKey},signal:AbortSignal.timeout(15000)});}catch{throw new Error('Could not reach Gemini to load models.');}
+    if(!response.ok)throw new Error(response.status===429?'Gemini quota reached. Try again later.':'Could not load models. Check your API key and project access.');
+    const body=await response.json();
+    for(const model of body.models||[])if(model.supportedGenerationMethods?.includes('generateContent')&&/^models\/gemini-[a-z0-9.-]+$/.test(model.name)&&/flash/.test(model.name)&&!/image|audio|tts|live|robotics/.test(model.name))available.push({id:model.name.slice(7),name:model.displayName||model.name.slice(7)});
+    token=body.nextPageToken||'';
+  }while(token);
+  return available;
+}

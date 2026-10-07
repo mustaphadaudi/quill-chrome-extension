@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Quill \u2014 Personal Writing Assistant",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Personal Gemini-powered grammar, spelling, clarity and tone suggestions. No subscriptions or upgrade prompts.",
-  "minimum_chrome_version": "102",
+  "minimum_chrome_version": "119",
   "permissions": [
     "storage"
   ],
@@ -32,10 +32,14 @@
         "https://*/*"
       ],
       "js": [
+        "content/adapters.js",
         "content/widget.js",
         "content/editor.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
     }
   ],
   "web_accessible_resources": [
