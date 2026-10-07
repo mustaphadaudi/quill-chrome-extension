@@ -1,0 +1,27 @@
+:root { color-scheme: light; font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #21312c; background: #fff; }
+* { box-sizing: border-box; }
+body { width: 350px; margin: 0; }
+main { padding: 24px; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: #12865b; color: white; font-size: 25px; font-weight: 700; }
+h1, h2, p { margin: 0; }
+h1 { font-size: 23px; letter-spacing: -.6px; line-height: 1.2; }
+h2 { font-size: 14px; font-weight: 650; }
+header p { font-size: 11px; margin-top: 4px; color: #67776f; }
+.version { margin-left: auto; border: 1px solid #e3eae6; padding: 2px 7px; border-radius: 6px; font-size: 11px; color: #67776f; }
+.control { display: flex; align-items: center; justify-content: space-between; padding-bottom: 22px; }
+.control p { font-size: 12px; color: #67776f; margin-top: 3px; }
+.switch { position: relative; width: 42px; height: 24px; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.switch span { display: block; height: 24px; border-radius: 20px; background: #c4cfca; }
+.switch span::after { content: ""; display: block; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: transform .15s; }
+.switch input:checked + span { background: #12865b; }
+.switch input:checked + span::after { transform: translateX(18px); }
+.switch input:focus-visible + span { outline: 3px solid #98d3bc; outline-offset: 3px; }
+.switch input:disabled { cursor: wait; }
+.notice { display: flex; gap: 10px; border: 1px solid #d8e9e0; background: #f4faf6; border-radius: 12px; padding: 16px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #12865b; margin-top: 7px; flex-shrink: 0; }
+.notice p { color: #62726a; font-size: 12px; margin-top: 5px; }
+#status { min-height: 20px; font-size: 12px; margin: 16px 0; color: #62726a; }
+footer { display: flex; justify-content: space-between; border-top: 1px solid #edf0ee; padding-top: 14px; font-size: 10px; color: #67776f; }
+@media (prefers-reduced-motion: reduce) { .switch span::after { transition: none; } }

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en-GB">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Quill field QA</title>
+<style>body{font:16px/1.6 system-ui;max-width:720px;margin:48px auto;padding:0 24px;color:#21312c}label{display:block;margin:24px 0}input,textarea{display:block;box-sizing:border-box;width:100%;padding:16px;border:1px solid #b4c9bf;border-radius:8px;font:inherit}textarea{height:180px}button{padding:10px}footer{margin-top:800px}</style></head>
+<body><h1>Quill · field QA</h1><p>In Step 1, the widget appears on supported fields and sends no text. Passwords, email inputs and read-only fields must have no widget.</p>
+<label>Text input<input id="plain" type="text" value="This are a test sentence."></label>
+<label>Textarea<textarea id="draft">I has an idea for a personal writing assistant.</textarea></label>
+<label>Password — excluded<input id="password" type="password" value="fixture-only"></label>
+<label>Email — excluded<input id="email" type="email" value="example@example.com"></label>
+<label>Read-only — excluded<textarea id="readonly" readonly>Do not edit.</textarea></label>
+<label>Card number autocomplete — excluded<input id="card" autocomplete="cc-number"></label>
+<button id="add" type="button">Add a dynamic textarea</button>
+<script src="fixture.js"></script>
+<footer>Scroll here to check the widget follows its active field or hides off screen.</footer></body></html>
