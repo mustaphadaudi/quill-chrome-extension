@@ -56,7 +56,7 @@ const server = http.createServer((req, res) => {
       globalThis.fetch = async () => ({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({summary:'Fix verb agreement.',tone:'Neutral',rewrite:'',suggestions:[{original:'are',replacement:'is',explanation:'Singular subject.',category:'grammar',occurrence:0}]})}]}}]})});
     });
     await page.locator('#plain').focus();
-    await host.locator('.indicator').click();
+    if (!(await host.locator('.check').isVisible())) await host.locator('.indicator').click();
     await host.locator('.check').click();
     await host.locator('.accept').waitFor();
     await host.locator('.accept').click();
