@@ -1,4 +1,4 @@
-export const DEFAULT_SETTINGS = Object.freeze({enabled: true, autoCheck: false, language: 'en-GB', model: 'gemini-2.5-flash-lite'});
+export const DEFAULT_SETTINGS = Object.freeze({enabled: true, autoCheck: false, language: 'en-GB', model: 'gemini-3.5-flash-lite'});
 export const MODES = Object.freeze(['check', 'clearer', 'concise', 'professional', 'friendly', 'confident']);
 export async function getSettings() {
   const {settings = {}} = await chrome.storage.local.get('settings');

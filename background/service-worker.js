@@ -1,4 +1,4 @@
-import { getSettings, MODES } from '../shared/settings.js';
+import { getSettings, saveSettings, MODES } from '../shared/settings.js';
 import { generate, validateRequest, listModels } from './gemini.js';
 const ready = chrome.storage.local.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});
 const cache = new Map();
@@ -10,6 +10,7 @@ async function handle(message, sender) {
     const {apiKey} = await chrome.storage.local.get('apiKey');
     return {ok:true,settings:{enabled:settings.enabled,autoCheck:settings.autoCheck},hasKey:!!apiKey};
   }
+  if(message.type==='QUILL_SET_AUTO_CHECK'){if(typeof message.value!=='boolean')throw new Error('Invalid live checking preference.');await saveSettings({autoCheck:message.value});return {ok:true};}
   if (message.type === 'QUILL_OPEN_PAD') { await chrome.tabs.create({url:chrome.runtime.getURL('workbench/workbench.html')});return {ok:true}; }
   if(['QUILL_LIST_MODELS','QUILL_TEST_CONNECTION'].includes(message.type)){
     if(!sender.url?.startsWith(chrome.runtime.getURL('')))throw new Error('Open Quill settings to use this action.');
@@ -44,7 +45,7 @@ async function handle(message, sender) {
   } finally {busy = false;}
 }
 chrome.runtime.onMessage.addListener((message,sender,reply) => {
-  if (sender.id !== chrome.runtime.id || !['QUILL_GET_STATUS','QUILL_ANALYZE','QUILL_OPEN_OPTIONS','QUILL_OPEN_PAD','QUILL_LIST_MODELS','QUILL_TEST_CONNECTION'].includes(message?.type)) return false;
+  if (sender.id !== chrome.runtime.id || !['QUILL_GET_STATUS','QUILL_SET_AUTO_CHECK','QUILL_ANALYZE','QUILL_OPEN_OPTIONS','QUILL_OPEN_PAD','QUILL_LIST_MODELS','QUILL_TEST_CONNECTION'].includes(message?.type)) return false;
   (async()=>{try{reply(await handle(message,sender));}catch(error){reply({ok:false,error:error.message || 'Quill could not process this request.'});}})();
   return true;
 });

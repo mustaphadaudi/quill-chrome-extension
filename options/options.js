@@ -23,6 +23,7 @@ $('remove').addEventListener('click',async () => {
   catch {$('status').textContent='Could not remove the key.';}
 });
 
+$('recommended').addEventListener('click',()=>{$('model').value='gemini-3.5-flash-lite';$('status').textContent='Gemini 3.5 Flash-Lite selected. Click Save and test connection.';});
 $('available').addEventListener('change',()=>{if($('available').value)$('model').value=$('available').value;});
 $('discover').addEventListener('click',async()=>{
   $('discover').disabled=true;$('status').textContent='Loading models visible to your saved key…';
@@ -34,7 +35,7 @@ $('discover').addEventListener('click',async()=>{
   }catch(error){$('status').textContent=error.message;}finally{$('discover').disabled=false;}
 });
 $('test').addEventListener('click',async()=>{
-  $('test').disabled=true;$('status').textContent='Testing the saved model with a short sample…';
-  try{const response=await chrome.runtime.sendMessage({type:'QUILL_TEST_CONNECTION'});if(!response?.ok)throw new Error(response?.error||'Test failed.');$('status').textContent='Connected: the saved key and model successfully checked a sample sentence.';}
+  $('test').disabled=true;$('status').textContent='Saving and testing this model with a short sample…';
+  try{const key=$('apiKey').value.trim();if(key&&/\s/.test(key))throw new Error('The API key must not contain spaces.');await saveSettings({enabled:$('enabled').checked,autoCheck:$('autoCheck').checked,language:$('language').value,model:$('model').value.trim()});if(key){await chrome.storage.local.set({apiKey:key});$('apiKey').value='';await keyStatus();}const response=await chrome.runtime.sendMessage({type:'QUILL_TEST_CONNECTION'});if(!response?.ok)throw new Error(response?.error||'Test failed.');$('status').textContent='Connected: the saved key and model successfully checked a sample sentence.';}
   catch(error){$('status').textContent=error.message;}finally{$('test').disabled=false;}
 });

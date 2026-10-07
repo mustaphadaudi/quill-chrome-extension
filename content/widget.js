@@ -7,13 +7,14 @@
   const button=document.createElement('button');button.className='indicator';button.type='button';button.textContent='Q';button.setAttribute('aria-label','Open Quill writing assistant');button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','quill-card');
   const card=document.createElement('section');card.id='quill-card';card.hidden=true;card.setAttribute('aria-label','Quill writing assistant');
   // Static local markup only. Every model-generated string below uses textContent.
-  card.innerHTML='<header><strong>Quill</strong><button class="close" type="button" aria-label="Close suggestions">×</button></header><p class="intro">Your words, a little clearer.</p><div class="actions"><button class="primary check" type="button">Check writing</button><button class="settings" type="button" aria-label="Open Quill settings">⚙</button></div><div class="rewrite-controls"><select aria-label="Rewrite style"><option value="clearer">Clearer</option><option value="concise">More concise</option><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="confident">Confident</option></select><button class="rewrite" type="button">Rewrite</button></div><p class="status" role="status" aria-live="polite">Check this field or select a passage first.</p><div class="results"></div><button class="pad" type="button">Open writing pad ↗</button><footer><button class="undo" type="button" disabled>Undo last edit</button><span>Personal edition</span></footer>';
+  card.innerHTML='<header><strong>Quill</strong><button class="close" type="button" aria-label="Close suggestions">×</button></header><p class="intro">Your words, a little clearer.</p><div class="actions"><button class="primary check" type="button">Check writing</button><button class="settings" type="button" aria-label="Open Quill settings">⚙</button></div><label class="live"><input type="checkbox" class="auto"> Live checking · sends writing to Gemini</label><div class="rewrite-controls"><select aria-label="Rewrite style"><option value="clearer">Clearer</option><option value="concise">More concise</option><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="confident">Confident</option></select><button class="rewrite" type="button">Rewrite</button></div><p class="status" role="status" aria-live="polite">Check this field or select a passage first.</p><div class="results"></div><button class="pad" type="button">Open writing pad ↗</button><footer><button class="undo" type="button" disabled>Undo last edit</button><span>Personal edition</span></footer>';
   root.append(css,card,button);
   const q=selector=>card.querySelector(selector);
   let handlers={};
   const setOpen=open=>{card.hidden=!open;button.setAttribute('aria-expanded',String(open));};
   button.addEventListener('click',()=>setOpen(card.hidden));
   q('.close').addEventListener('click',()=>{setOpen(false);button.focus();});
+  q('.auto').addEventListener('change',()=>handlers.auto?.(q('.auto').checked));
   q('.check').addEventListener('click',()=>handlers.run?.('check'));
   q('.rewrite').addEventListener('click',()=>handlers.run?.(q('select').value));
   q('.settings').addEventListener('click',()=>handlers.settings?.());
@@ -24,12 +25,13 @@
   function action(label,callback,classes='') {const b=document.createElement('button');b.type='button';b.textContent=label;b.className=classes;b.addEventListener('click',callback);return b;}
   globalThis.QuillWidget={
     bind(next){handlers=next;},
+    autoStatus(value){q('.auto').checked=value;},
     message(text){q('.status').textContent=text;},
     loading(value){for(const selector of ['.check','.rewrite','select'])q(selector).disabled=value;button.textContent=value?'…':'Q';},
     docsMode(){q('.intro').textContent='Google Docs: copy your passage into the writing pad, then paste the correction back.';q('.check').disabled=true;q('.rewrite').disabled=true;},
     reset(){q('.intro').textContent='Your words, a little clearer.';q('.results').replaceChildren();this.loading(false);this.message('Check this field or select a passage first.');},
     undoAvailable(value){q('.undo').disabled=!value;},
-    result(result,onApply){
+    result(result,onApply,onDismiss=()=>{}){
       const container=q('.results');container.replaceChildren();
       this.message([result.tone && `Tone: ${result.tone}`,result.summary].filter(Boolean).join(' · '));
       button.textContent=result.suggestions.length?String(result.suggestions.length):'Q';
@@ -43,7 +45,7 @@
         const before=document.createElement('del');before.textContent=edit.original;
         const after=document.createElement('strong');after.textContent=edit.replacement || '(delete)';
         const explanation=document.createElement('p');explanation.textContent=edit.explanation;
-        item.append(category,before,after,explanation,action('Accept',()=>onApply({suggestions:[edit]}),'accept'),action('Dismiss',()=>{remaining=remaining.filter(candidate=>candidate!==edit);item.remove();all.disabled=remaining.length===0;button.textContent=remaining.length?String(remaining.length):'Q';},'dismiss'));
+        item.append(category,before,after,explanation,action('Accept',()=>onApply({suggestions:[edit]}),'accept'),action('Dismiss',()=>{onDismiss(edit);remaining=remaining.filter(candidate=>candidate!==edit);item.remove();all.disabled=remaining.length===0;button.textContent=remaining.length?String(remaining.length):'Q';},'dismiss'));
         container.append(item);
       });
     },

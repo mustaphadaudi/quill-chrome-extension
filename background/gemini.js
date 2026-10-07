@@ -39,6 +39,24 @@ export function applyEdits(text, suggestions) {
   }
   return text;
 }
+async function apiError(response, apiKey, model, source='') {
+  let detail='';
+  try {
+    const body=await response.json();
+    const message=typeof body.error?.message==='string'?body.error.message:'';
+    const status=typeof body.error?.status==='string'?body.error.status:'';
+    detail=[status,message].filter(Boolean).join(': ');
+  } catch {}
+  detail=detail.split(apiKey).join('[key removed]');
+  if(source)detail=detail.split(source).join('[writing removed]');
+  detail=detail.replace(/AIza[\w-]+/g,'[key removed]').replace(/[\x00-\x1f]/g,' ').slice(0,1200);
+  const hint=response.status===429?'Gemini quota reached. Check your free allowance in AI Studio.':
+    response.status===404?'This Gemini model is unavailable. In settings try gemini-3.5-flash-lite, save and test.':
+    [400,401,403].includes(response.status)?'Gemini rejected the request. Check your key and project access.':
+    'Gemini is temporarily unavailable. Try again later.';
+  const error=new Error(`${hint} [HTTP ${response.status}; ${model}; v1beta]${detail?' '+detail:''}`);
+  error.quota=response.status===429;return error;
+}
 export async function generate({text, mode, settings, apiKey, fetcher = fetch}) {
   validateRequest(text, mode);
   if (!apiKey) throw new Error('Add your Gemini API key in Quill settings first.');
@@ -47,15 +65,10 @@ export async function generate({text, mode, settings, apiKey, fetcher = fetch}) 
     response = await fetcher(`https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent`, {
       method: 'POST', headers: {'Content-Type':'application/json','x-goog-api-key':apiKey},
       signal: AbortSignal.timeout(25000),
-      body: JSON.stringify({systemInstruction:{parts:[{text: instructions(mode,settings.language)}]},contents:[{role:'user',parts:[{text: JSON.stringify({mode,source:text})}]}],generationConfig:{temperature:0.2,maxOutputTokens:8192,responseMimeType:'application/json',responseSchema:RESPONSE_SCHEMA}})
+      body: JSON.stringify({systemInstruction:{parts:[{text: instructions(mode,settings.language)}]},contents:[{role:'user',parts:[{text: JSON.stringify({mode,source:text})}]}],generationConfig:{temperature:settings.model.startsWith('gemini-3')?1:0.2,maxOutputTokens:8192,responseMimeType:'application/json',responseSchema:RESPONSE_SCHEMA}})
     });
   } catch { throw new Error('Gemini could not be reached or timed out. Your text has not been changed.'); }
-  if (!response.ok) {
-    if (response.status === 429) { const error = new Error('Gemini quota reached. Wait a minute, or check your allowance in AI Studio.'); error.quota = true; throw error; }
-    if ([400,401,403].includes(response.status)) throw new Error('Gemini rejected the request. Check your API key, model access and project settings.');
-    if (response.status === 404) throw new Error('This Gemini model is unavailable. Choose an available free-tier model in settings.');
-    throw new Error('Gemini is temporarily unavailable. Try again later.');
-  }
+  if (!response.ok) throw await apiError(response,apiKey,settings.model,text);
   const body = await response.json();
   const candidate = body.candidates?.[0];
   if (candidate?.finishReason !== 'STOP') throw new Error('Gemini did not finish the response. Try a shorter passage.');
@@ -71,7 +84,7 @@ export async function listModels(apiKey, fetcher=fetch) {
   do {
     const url=new URL('https://generativelanguage.googleapis.com/v1beta/models');url.searchParams.set('pageSize','1000');if(token)url.searchParams.set('pageToken',token);
     let response;try{response=await fetcher(url.href,{headers:{'x-goog-api-key':apiKey},signal:AbortSignal.timeout(15000)});}catch{throw new Error('Could not reach Gemini to load models.');}
-    if(!response.ok)throw new Error(response.status===429?'Gemini quota reached. Try again later.':'Could not load models. Check your API key and project access.');
+    if(!response.ok)throw await apiError(response,apiKey,'models.list');
     const body=await response.json();
     for(const model of body.models||[])if(model.supportedGenerationMethods?.includes('generateContent')&&/^models\/gemini-[a-z0-9.-]+$/.test(model.name)&&/flash/.test(model.name)&&!/image|audio|tts|live|robotics/.test(model.name))available.push({id:model.name.slice(7),name:model.displayName||model.name.slice(7)});
     token=body.nextPageToken||'';

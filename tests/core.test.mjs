@@ -61,3 +61,11 @@ test('model discovery paginates, filters text generation, and never puts key in 
  });assert.equal(calls,2);assert.deepEqual(models.map(x=>x.id),['gemini-test-flash','gemini-test-flash-lite']);
  await assert.rejects(listModels(''),/Save your API key/);
 });
+
+test('API diagnostics retain provider reason but redact the key and source',async()=>{
+ const key='AIza-fixture-private-key';
+ await assert.rejects(generate({text:source,mode:'check',settings,apiKey:key,fetcher:async()=>({ok:false,status:404,json:async()=>({error:{status:'NOT_FOUND',message:`Model access disabled. ${key} ${source}`}})})}),error=>{
+  assert.match(error.message,/HTTP 404; gemini-2.5-flash-lite; v1beta/);assert.match(error.message,/NOT_FOUND: Model access disabled/);assert.ok(!error.message.includes(key));assert.ok(!error.message.includes(source));return true;
+ });
+ let config;await generate({text:source,mode:'check',settings:{...settings,model:'gemini-3.5-flash-lite'},apiKey:key,fetcher:async(url,options)=>{config=JSON.parse(options.body).generationConfig;return success(response);}});assert.equal(config.temperature,1);
+});

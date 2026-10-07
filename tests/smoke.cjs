@@ -45,7 +45,7 @@ const server = http.createServer((req, res) => {
     page.on('pageerror', error => errors.push(error.message));
     await worker.evaluate(async () => {
       await chrome.storage.local.set({apiKey:'browser-fixture-key'});
-      globalThis.fetch = async () => ({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({summary:'Fix verb agreement.',tone:'Neutral',rewrite:'',suggestions:[{original:'are',replacement:'is',explanation:'Singular subject.',category:'grammar',occurrence:0}]})}]}}]})});
+      globalThis.fetch = async url => {globalThis.lastModel=url;if(globalThis.fixtureError)return {ok:false,status:404,json:async()=>({error:{status:'NOT_FOUND',message:'Model access disabled for browser-fixture-key'}})};return ({ok:true,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify({summary:'Fix verb agreement.',tone:'Neutral',rewrite:'',suggestions:[{original:'are',replacement:'is',explanation:'Singular subject.',category:'grammar',occurrence:0}]})}]}}]})});};
     });
     await page.goto(`http://127.0.0.1:${server.address().port}/tests/editor-fixture.html`);
     const host = page.locator('[data-quill-widget]');
@@ -60,11 +60,20 @@ const server = http.createServer((req, res) => {
     if (!(await host.locator('.check').isVisible())) await host.locator('.indicator').click();
     await host.locator('.check').click();
     await host.locator('.accept').waitFor();
-    await host.locator('.accept').click();
+    const ink=page.locator('[data-quill-highlights]');await ink.locator('.mark').waitFor();
+    const line=await ink.locator('.mark').first().boundingBox();assert.ok(line.width>10);
+    await page.mouse.move(line.x+line.width/2,line.y-5);await ink.locator('.tip').waitFor({state:'visible'});
+    assert.equal(await ink.locator('.tip strong').textContent(),'is');await ink.locator('.tip .accept').click();
+    assert.equal(await ink.locator('.mark').count(),0);
     assert.equal(await page.locator('#plain').inputValue(), 'This is a test sentence.');
     await host.locator('.undo').click();
     assert.equal(await page.locator('#plain').inputValue(), 'This are a test sentence.');
-    console.log('PASS: correction and undo with mocked Gemini transport');
+    console.log('PASS: red underline, hover correction, accept and undo with mocked Gemini transport');
+    await host.locator('.check').click();await ink.locator('.mark').waitFor();
+    await ink.locator('.mark').first().focus();await ink.locator('.tip .dismiss').click();assert.equal(await ink.locator('.mark').count(),0);assert.equal(await page.locator('#plain').inputValue(),'This are a test sentence.');
+    await host.locator('.auto').check();await page.locator('#plain').fill('This are a live sentence.');await ink.locator('.mark').waitFor();
+    await page.locator('#plain').fill('New writing without the old error.');assert.equal(await ink.locator('.mark').count(),0);
+    await host.locator('.auto').uncheck();console.log('PASS: dismiss leaves text intact; live checking; stale underlines cleared on typing');
     for (const selector of ['#password', '#email', '#readonly', '#card']) {
       await page.locator(selector).focus();
       await host.waitFor({state: 'hidden'});
@@ -75,7 +84,9 @@ const server = http.createServer((req, res) => {
     console.log('PASS: dynamically created textarea supported');
     await page.locator('#rich').focus();await host.waitFor({state:'visible'});
     if(!(await host.locator('.check').isVisible()))await host.locator('.indicator').click();
-    await host.locator('.check').click();await host.locator('.accept').waitFor();await host.locator('.accept').click();
+    await host.locator('.check').click();await host.locator('.accept').waitFor();await ink.locator('.mark').waitFor();
+    const richLine=await ink.locator('.mark').first().boundingBox();const word=await page.locator('#rich').evaluate(el=>{const r=document.createRange();r.setStart(el.firstChild.firstChild,5);r.setEnd(el.firstChild.firstChild,8);const b=r.getBoundingClientRect();return {x:b.x,width:b.width};});assert.ok(Math.abs(richLine.x-word.x)<2);assert.ok(Math.abs(richLine.width-word.width)<2);
+    await ink.locator('.mark').first().focus();await ink.locator('.tip .accept').click();
     assert.equal(await page.locator('#rich').innerText(),'This is a test sentence.\nSecond paragraph.');
     assert.equal(await page.locator('#rich strong').textContent(),'test');
     await host.locator('.undo').click();assert.equal(await page.locator('#rich strong').textContent(),'test');assert.ok((await page.locator('#rich').innerText()).startsWith('This are'));
@@ -88,8 +99,10 @@ const server = http.createServer((req, res) => {
     await framed.locator('[data-quill-widget]').waitFor({state:'visible'});
     console.log('PASS: rich text with formatting and undo, shadow-root editor, search input and iframe');
     const pad=await context.newPage();await pad.goto(`chrome-extension://${id}/workbench/workbench.html`);
-    await pad.locator('#source').fill('This are a pad test sentence.');await pad.locator('#check').click();await pad.locator('#results article button').first().click();
+    await pad.locator('#source').fill('This are a pad test sentence.');await pad.locator('#check').click();await pad.locator('[data-quill-highlights] .mark').first().focus();await pad.locator('[data-quill-highlights] .tip .accept').click();
     assert.equal(await pad.locator('#source').inputValue(),'This is a pad test sentence.');await pad.locator('#undo').click();assert.equal(await pad.locator('#source').inputValue(),'This are a pad test sentence.');await pad.close();
+    const options=await context.newPage();await options.goto(`chrome-extension://${id}/options/options.html`);await options.locator('#save:not([disabled])').waitFor();await options.locator('#recommended').click();await options.locator('#test').click();await options.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Connected:'));assert.ok((await worker.evaluate(()=>globalThis.lastModel)).includes('gemini-3.5-flash-lite'));
+    await options.locator('#model').fill('gemini-3.8-flash');await worker.evaluate(()=>globalThis.fixtureError=true);await options.locator('#test').click();await options.waitForFunction(()=>document.querySelector('#status').textContent.includes('HTTP 404'));const failure=await options.locator('#status').textContent();assert.ok(failure.includes('NOT_FOUND'));assert.ok(failure.includes('gemini-3.8-flash'));assert.ok(!failure.includes('browser-fixture-key'));await worker.evaluate(()=>globalThis.fixtureError=false);await options.close();console.log('PASS: save-and-test uses selected model; provider diagnostics redact saved key');
     const docs=await context.newPage();await docs.route('https://docs.google.com/document/d/quill-fixture/edit',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Docs canvas fixture</title><canvas width="500" height="200"></canvas>'}));
     await docs.goto('https://docs.google.com/document/d/quill-fixture/edit');await docs.locator('[data-quill-widget]').waitFor({state:'visible'});await docs.locator('[data-quill-widget] .indicator').click();await docs.locator('[data-quill-widget] .pad').waitFor({state:'visible'});assert.equal(await docs.locator('[data-quill-widget] .check').isDisabled(),true);await docs.close();
     console.log('PASS: writing pad checks and undo; persistent Docs button without a text input');

@@ -67,5 +67,5 @@
     if(read(field)!==expected)throw new Error('This editor transformed the edit. Review its text; use its native undo if needed.');
   }
   function undo(field,record){if(plain(field)){replace(field,0,read(field).length,record.before);return;}field.focus();for(let n=0;n<Math.max(1,record.undoStates?.length||1);n++){if(!document.execCommand('undo'))break;const current=read(field);if(current===record.before)return;if(!record.undoStates?.includes(current))break;}throw new Error('This editor cannot undo that change automatically. Use its native undo.');}
-  globalThis.QuillEditors={resolve,read,snapshot,replace,undo};
+  globalThis.QuillEditors={resolve,read,snapshot,replace,undo,range};
 })();
