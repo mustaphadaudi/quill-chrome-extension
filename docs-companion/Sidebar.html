@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f6faf8;color:#20372e;font:13px/1.5 system-ui,sans-serif}main{padding:16px}header{display:flex;align-items:center;gap:10px;margin-bottom:16px}.logo{display:grid;place-items:center;background:#138364;color:white;font-size:23px;font-weight:700;border-radius:12px;width:42px;height:42px}h1{font-size:17px;margin:0}header p{margin:0;color:#62776c;font-size:12px}p{margin:10px 0}button,input,select,textarea{font:inherit}button{background:white;border:1px solid #ceded5;border-radius:8px;color:#294d3b;padding:9px 10px;cursor:pointer}button.primary{background:#138364;border-color:#138364;color:white}button:disabled{opacity:.5;cursor:wait}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #168463;outline-offset:2px}.row{display:flex;gap:6px;flex-wrap:wrap}.row button{flex:1}.row select{flex:1;min-width:130px}.note{color:#64766b;font-size:12px}label{display:block;margin:12px 0 5px;font-weight:600}input,select,textarea{width:100%;background:white;color:#20372e;border:1px solid #ceded5;border-radius:7px;padding:9px}textarea{height:100px;resize:vertical;font-size:13px}details{background:white;border:1px solid #dae6df;border-radius:10px;padding:12px;margin:16px 0}summary{cursor:pointer;font-weight:600}#status{padding:10px;border-radius:8px;background:#eaf2ed;overflow-wrap:anywhere}article{margin:10px 0;border:1px solid #dae6df;background:white;border-radius:10px;padding:12px}small{color:#b43749;text-transform:capitalize;display:block}del{color:#b43749;margin-right:8px;white-space:pre-wrap}strong.replacement{color:#138364;white-space:pre-wrap}article p{font-size:12px;color:#5c7265}.rewrite-preview{background:white;border:1px solid #dae6df;border-radius:8px;padding:12px;white-space:pre-wrap}#count{font-size:14px;margin:18px 0 8px}footer{margin-top:20px;font-size:11px;color:#6a7c72}.hidden,[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+<main>
+  <header><span class="logo">Q</span><div><h1>Quill for Docs</h1><p>Your words, a little clearer.</p></div></header>
+  <p>Select text in one paragraph, or place the cursor inside a paragraph. Accepted corrections appear directly in your document.</p>
+  <div class="row"><button id="selection" class="primary" type="button">Check selection</button><button id="paragraph" type="button">Check paragraph</button></div>
+  <label for="mode">Rewrite style</label>
+  <div class="row"><select id="mode"><option value="clearer">Clearer</option><option value="concise">More concise</option><option value="professional">Professional</option><option value="friendly">Friendly</option><option value="confident">Confident</option></select><button id="rewrite" type="button">Rewrite selection</button></div>
+  <p class="note">Checks send only the chosen passage to Gemini. This version checks on request; it does not add live underlines to the document.</p>
+  <p id="status" role="status" aria-live="polite">Loading settings…</p>
+  <section id="checked" hidden><label for="passage">Checked passage</label><textarea id="passage" readonly aria-label="Checked passage"></textarea><h2 id="count">Suggestions</h2><div id="results"></div><div class="row"><button id="undo" type="button" disabled>Undo last Quill edit</button><button id="clear" type="button">Clear check</button></div></section>
+  <details id="settings"><summary>Gemini settings</summary><form id="preferences">
+    <p id="keyStatus" class="note">Loading key status…</p>
+    <label for="key">Your Gemini API key</label><input id="key" type="password" autocomplete="off" placeholder="Enter or replace your key">
+    <label for="model">Model ID</label><input id="model" type="text" required pattern="gemini-[a-z0-9.\-]+" value="gemini-3.5-flash-lite">
+    <label for="language">English variant</label><select id="language"><option value="en-GB">British English</option><option value="en-US">American English</option></select>
+    <div class="row" style="margin-top:12px"><button id="save" type="submit">Save settings</button><button id="test" type="button">Save and test</button></div>
+    <button id="remove" type="button" style="margin-top:8px">Remove saved key</button>
+    <p class="note">The companion stores its own key in your Apps Script user properties. Your Chrome extension key is not transferred. Google quotas apply; use a project with billing disabled for free usage.</p>
+    <a href="https://aistudio.google.com/apikey" rel="noreferrer">Open Google AI Studio ↗</a>
+  </form></details>
+  <footer>Personal edition · no subscriptions<br>Checks expire after up to 30 minutes. Recheck after changing document text or tabs.</footer>
+</main>
+<script>
+(() => {
+  const $=id=>document.getElementById(id);let session=null,busy=false,hasKey=false;
+  const rpc=(name,...args)=>new Promise((resolve,reject)=>{const runner=google.script.run.withSuccessHandler(resolve).withFailureHandler(error=>reject(new Error(error.message||'The Docs companion could not complete this action.')));runner[name](...args);});
+  function status(message){$('status').textContent=message;}
+  function settings(value){hasKey=value.hasKey;$('model').value=value.model;$('language').value=value.language;$('keyStatus').textContent=value.hasKey?'A key is saved for your Google account in this script.':'Save your Gemini API key to start.';$('remove').disabled=!value.hasKey;if(!value.hasKey)$('settings').open=true;}
+  function button(label,callback,primary=false){const element=document.createElement('button');element.type='button';element.textContent=label;if(primary)element.className='primary';element.addEventListener('click',callback);return element;}
+  function render(){
+    $('results').replaceChildren();$('checked').hidden=!session;if(!session)return;
+    $('passage').value=session.text;$('undo').disabled=!session.canUndo;$('count').textContent=session.rewrite?'Rewrite preview':`${session.suggestions.length} remaining suggestion${session.suggestions.length===1?'':'s'}`;
+    if(session.rewrite){const preview=document.createElement('p');preview.className='rewrite-preview';preview.textContent=session.rewrite;$('results').append(preview,button('Apply rewrite in Docs',()=>change('rewrite'),true));return;}
+    if(session.suggestions.length)$('results').append(button('Apply all in Docs',()=>change('all'),true));
+    session.suggestions.forEach((edit,index)=>{
+      const item=document.createElement('article'),kind=document.createElement('small'),before=document.createElement('del'),after=document.createElement('strong'),explanation=document.createElement('p'),actions=document.createElement('div');
+      kind.textContent=edit.category;before.textContent=edit.original;after.className='replacement';after.textContent=edit.replacement||'(delete)';explanation.textContent=edit.explanation;actions.className='row';actions.append(button('Accept',()=>change('accept',index),true),button('Dismiss',()=>change('dismiss',index)));item.append(kind,before,after,explanation,actions);$('results').append(item);
+    });
+  }
+  async function task(message,operation){
+    if(busy)return;busy=true;status(message);const controls=[...document.querySelectorAll('button,input,select')],prior=controls.map(control=>control.disabled);controls.forEach(control=>control.disabled=true);
+    try{await operation();}catch(error){status(error.message);}finally{busy=false;controls.forEach((control,index)=>{if(control.isConnected)control.disabled=prior[index];});$('undo').disabled=!session?.canUndo;$('remove').disabled=!hasKey;}
+  }
+  async function check(scope,mode='check'){
+    await task('Checking your passage with Gemini…',async()=>{
+      if(session){await rpc('docsForget',session.token);session=null;render();}
+      session=await rpc('docsCheck',{scope,mode});render();status([session.tone&&`Tone: ${session.tone}`,session.summary].filter(Boolean).join(' · '));
+    });
+  }
+  async function change(action,index){
+    if(!session)return;
+    await task(action==='dismiss'?'Dismissing suggestion…':action==='undo'?'Undoing the last Quill edit…':'Applying in Google Docs…',async()=>{
+      try{session=await rpc('docsChange',session.token,action,index??null);render();status(action==='dismiss'?'Dismissed. Your text is unchanged.':action==='undo'?'Undone. The previous suggestions are restored.':`Applied in Docs. ${session.suggestions.length} suggestion${session.suggestions.length===1?'':'s'} remaining.`);}
+      catch(error){const token=session?.token;session=null;render();if(token)try{await rpc('docsForget',token);}catch{}throw error;}
+    });
+  }
+  async function save(){const value=await rpc('docsSaveSettings',{key:$('key').value,model:$('model').value.trim(),language:$('language').value});$('key').value='';settings(value);return value;}
+  $('selection').addEventListener('click',()=>check('selection'));
+  $('paragraph').addEventListener('click',()=>check('paragraph'));
+  $('rewrite').addEventListener('click',()=>check('selection',$('mode').value));
+  $('undo').addEventListener('click',()=>change('undo'));
+  $('clear').addEventListener('click',()=>task('Clearing this check…',async()=>{if(session)await rpc('docsForget',session.token);session=null;render();status('Check cleared. The document is unchanged.');}));
+  $('preferences').addEventListener('submit',event=>{event.preventDefault();task('Saving settings…',async()=>{await save();status('Settings saved. Select a passage in Docs to check it.');});});
+  $('test').addEventListener('click',()=>task('Saving and testing your connection…',async()=>{await save();const response=await rpc('docsTestConnection');status(response.message);}));
+  $('remove').addEventListener('click',()=>task('Removing the saved key…',async()=>{settings(await rpc('docsRemoveKey'));status('Saved key removed.');}));
+  task('Loading settings…',async()=>{const value=await rpc('docsSettings');settings(value);status(value.hasKey?'Ready. Select a passage in Docs, then click Check selection.':'Open Gemini settings below and save your key.');});
+})();
+</script>
+</body>
+</html>

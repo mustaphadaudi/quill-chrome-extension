@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quill \u2014 Personal Writing Assistant",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Personal Gemini-powered grammar, spelling, clarity and tone suggestions. No subscriptions or upgrade prompts.",
   "minimum_chrome_version": "119",
   "permissions": [

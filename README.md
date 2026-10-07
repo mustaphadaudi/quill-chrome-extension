@@ -17,7 +17,7 @@ Vanilla HTML, CSS and JavaScript, loaded directly as an unpacked Chrome extensio
 
 No npm or Python installation is required to use the extension. Update by replacing files in the SAME existing extension folder (or pulling changes), clicking Reload on the extension card, and reloading your website. Keeping the folder preserves the unpacked extension identity and its saved settings. Do not remove/reinstall it just to update.
 
-## Included in 0.4.1
+## Included in 0.5.0
 
 - Floating indicator and a clean shadow-root suggestion card.
 - Red underlines on checked suggestions, hover cards, and keyboard-accessible accept/dismiss without adding markup to your editor.
@@ -36,11 +36,15 @@ The default model is `gemini-3.5-flash-lite`, currently listed with free-tier te
 
 Google now restricts 2.5 model access for new projects: https://ai.google.dev/gemini-api/docs/deprecations. The new default is listed with free text input/output at https://ai.google.dev/gemini-api/docs/pricing. An existing saved model is preserved until you explicitly select and save another one. The connection test saves the settings shown in the form before sending its sample request.
 
+## Google Docs companion
+
+The separate [Docs companion](docs-companion/README.md) adds a native sidebar for checking selected text or a paragraph, accepting corrections directly in the document, rewrites and guarded Undo. Install its four files through **Docs → Extensions → Apps Script** following the linked guide. It does not require a public deployment. Reloading the Chrome extension alone does not install it. This initial document-bound version checks one Text element at a time and does not add live canvas underlines. Live Google account acceptance is still required; automated tests simulate its Google APIs.
+
 ## Supported fields and limitations
 
 This release supports ordinary text/search inputs, textareas and contenteditable rich-text editors on HTTP/HTTPS pages, including dynamically added fields, open shadow roots and embedded frames. Rich-text corrections replace exact ranges and preserve formatting outside those ranges; rewrites can change formatting within the selected passage. Native editor behaviour varies, and production sites remain subject to separate acceptance testing. It excludes passwords, email input types, read-only/disabled fields and common password/payment/login autocomplete values. Those filters are not a complete sensitive-data detector: you choose which writing to send.
 
-Google Docs document text is canvas-rendered, not a normal editable DOM field. On Docs, Quill shows a persistent Q button with an **Open writing pad** action. Copy a passage from Docs into the pad, check or rewrite it, then copy the result back. Automatic in-document checking or application in Google Docs is NOT implemented; the dictionary search box is not a document integration. Closed shadow roots and site-specific Gmail/Teams integrations remain future work. Red underlines work on supported DOM fields and in the writing pad; they do not cover canvas text in Docs. Chrome internal pages and the Chrome Web Store do not allow injection. Quill does not run on `file://` pages. Chrome New Tab and the browser address bar are protected Chrome UI and cannot host this content-script widget; the toolbar writing pad is available instead. Some websites can also interfere with injected UI or programmatic edits; test on your intended sites before relying on it.
+Google Docs document text is canvas-rendered, not a normal editable DOM field. On Docs, Quill shows a persistent Q button with an **Open writing pad** action. Copy a passage from Docs into the pad, check or rewrite it, then copy the result back. Automatic canvas checking and editing by the Chrome content script are NOT implemented; direct accepted edits are available through the separately installed Docs sidebar companion. The dictionary search box is not a document integration. Closed shadow roots and site-specific Gmail/Teams integrations remain future work. Red underlines work on supported DOM fields and in the writing pad; they do not cover canvas text in Docs. Chrome internal pages and the Chrome Web Store do not allow injection. Quill does not run on `file://` pages. Chrome New Tab and the browser address bar are protected Chrome UI and cannot host this content-script widget; the toolbar writing pad is available instead. Some websites can also interfere with injected UI or programmatic edits; test on your intended sites before relying on it.
 
 Checks are limited to 12,000 characters per request; oversized text is rejected without truncation. Text changing during a check invalidates the result. Accepting a suggestion preserves unaffected suggestions and adjusts their positions without another Gemini request. Suggestions overlapping an accepted edit are removed, and exact text is checked again before application. Pad Undo restores the previous suggestions. Manually typing still clears old results to prevent stale edits. Dismissed suggestions are excluded from apply-all. Undo never overwrites writing that changed after an edit. AI suggestions require your review.
 
@@ -74,7 +78,7 @@ The `storage` permission persists preferences. HTTP/HTTPS content-script matches
 With Node.js 22+ installed, run unit QA (no dependencies needed):
 
 ```powershell
-node --test tests/core.test.mjs
+npm test
 ```
 
 For the actual Chromium extension smoke test:

@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '22'
       - name: Unit and syntax QA
-        run: node --test tests/core.test.mjs
+        run: node --test tests/core.test.mjs tests/docs-companion.test.mjs
       - name: Install browser test tooling
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Install Chromium
