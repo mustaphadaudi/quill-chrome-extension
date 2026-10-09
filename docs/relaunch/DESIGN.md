@@ -35,6 +35,29 @@ Review these flows in popup, inline suggestion-card and onboarding/consent mocku
 
 ## Proposed UX contract — review draft
 
+### Review 01 — editable screens and walkthrough
+
+- [Open the Figma review, starting at Welcome](https://www.figma.com/design/DXaOzGDFROeBAD1qmXogHJ/Dictate-UX-review-01?node-id=3-27).
+- [Open the clickable prototype](https://www.figma.com/proto/DXaOzGDFROeBAD1qmXogHJ/Dictate-UX-review-01?node-id=3-27&starting-point-node-id=3%3A27).
+- [Repository snapshot of all screens](../../assets/brand/previews/dictate-ux-review-01.png).
+
+Created 2026-10-09 for review, not approved production UI. Twelve editable frames cover welcome, consent, ready popup, checking, correction, applied/Undo, dismissal, stale results, connection failure, settings, dark/narrow/focus and off/setup-deferred. There are 29 navigation actions and three reusable button components. This is a Figma simulation: no real checking, stored settings, permission grant or provider connection. Preview controls branch to returned results, changed text and connection failure; they are review-only controls, not proposed product buttons.
+
+The canvas uses temporary review colours to make the layouts judgeable: cream `#F7F2E8`, orange `#F26A2E`, charcoal `#242421`, sand `#E8DFCF`, muted text `#625E56`, white `#FFFFFF`, dark surface `#191C1B`, dark panel `#292D2A`, dark secondary text `#C5CABC`. These are newly selected mockup values, **not transcriptions of the inaccessible approved reference and not implementation-locked tokens**. The reference palette still needs transfer/verification. Sage/sunset accents can be considered in later artwork; they are not needed for these functional screens.
+
+Bebas Neue is used for branding/display and Inter for functional controls/body/status headings. The type-only Dictate treatment and labelled Supreme Editor area are layout placeholders; no final emblem, mascot or production vector is represented by this review.
+
+Review decisions:
+
+1. **Look:** cream/orange surfaces, restrained cards and the split between expressive onboarding and quiet corrections.
+2. **Flow:** manual whole-field checking, clear Accept/Dismiss, safe Undo and explicit rechecking after text changes.
+3. **Preferences:** site opt-in and the proposed light/dark treatment.
+4. **Development artwork:** require final art before the first slice, or explicitly allow labelled temporary assets while behaviour is built.
+
+Validation: rendered the full canvas, corrected text/container sizing, inspected the revised composition and checked the specified fonts and screen bounds. Prototype destinations were structurally checked; this does not establish live keyboard/screen-reader behaviour or production browser compatibility. The final Figma flow includes branches for stale/error cases and Undo returns to the original text ready for a fresh check.
+
+Implementation starts only after review feedback and the readiness gates in [TASKS.md](TASKS.md) are resolved. Do not interpret a request to create these mockups as approval of their contents.
+
 These are recommended defaults to review together. They deliberately leave provider, framework, permission implementation and exact visual tokens unresolved. The first vertical slice supports one ordinary textarea; contenteditable follows, then the high-priority Google Docs milestone. A tone selector, rewrite workspace and automatic checking are outside this first slice.
 
 ### Flow 1 — first use and consent

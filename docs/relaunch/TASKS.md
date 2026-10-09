@@ -11,6 +11,8 @@
 - [ ] Transfer the approved reference image and record provenance in the existing asset inventory; transcribe shown preliminary hex values and verify before locking tokens.
 - [x] Draft UX flows and interactions for onboarding/consent, inline check/accept/dismiss/undo, popup/settings and loading/empty/error states in [DESIGN.md](DESIGN.md).
 - [ ] Review proposed interaction defaults in DESIGN.md; draft completion is not behaviour approval.
+- [x] Create editable Figma review 01: twelve screens, 29 prototype actions and a repository review-sheet export linked from DESIGN.md.
+- [ ] User reviews the mockups and records look/flow changes or approval; do not infer approval from requesting design work.
 - [ ] Approve final UI direction, basic user flows, palette tokens, typography and microcopy boundaries using [DESIGN.md](DESIGN.md).
 - [ ] Produce and approve final assets with provenance and small-size, light/dark and accessibility checks per the asset handoff.
 - [ ] Decide data/inference model and acceptable permissions.
@@ -40,6 +42,12 @@
 One primary Codex developer. Each task gets its own completion criteria, tests and small reviewable commit. Add a second agent only for independent work.
 
 ## First implementation milestone — provisional brief
+
+### When to start the Codex implementation chat
+
+The review mockups are ready. **The implementation brief is not yet released.** First review the look and interaction choices in DESIGN.md, then settle processing/permissions, the toolchain, limits and final-vs-temporary artwork below. The planning chat should explicitly say “Ready for Codex implementation” only when these gates are checked, and provide the reviewed branch commit as the handoff reference.
+
+Keep the eventual handoff bounded: read AGENTS.md and docs/relaunch/, confirm the approved reference commit, implement only the first textarea slice described here, and report the acceptance evidence. Do not begin Google Docs, replace legacy Quill identifiers, merge or deploy in that first task. No new implementation chat has been created by this planning work.
 
 Status: prepared for review, **not ready to implement**. The user requested UX planning on 2026-10-09; that does not approve every default in the resulting draft. [DESIGN.md](DESIGN.md) owns interaction behaviour and [PRODUCT.md](PRODUCT.md) owns scope.
 

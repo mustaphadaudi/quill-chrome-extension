@@ -33,6 +33,14 @@ assets/brand/
 
 ## Approval and provenance
 
+### UX review 01 — draft for user review
+
+- Editable source: [Dictate UX review 01 in Figma](https://www.figma.com/design/DXaOzGDFROeBAD1qmXogHJ/Dictate-UX-review-01?node-id=3-27).
+- Repository export: [previews/dictate-ux-review-01.png](previews/dictate-ux-review-01.png), exported 2026-10-09 after layout review. This screenshot is a review sheet, not a runtime asset or production UI raster.
+- Creator: Codex, via the Figma Plugin API for this request. Native text, frames, variable-bound colours and reusable button instances; no third-party UI artwork imported. Bebas Neue/Inter were available in the design tool; font-file distribution/licensing remains a production handoff check.
+- Twelve screens and 29 prototype actions; proposed layouts and behaviour only. Original mascot/emblem assets remain unavailable; labelled artwork area and type-only wordmark are placeholders.
+- Palette values used in this mockup are temporary choices recorded in DESIGN.md; they do not recover, replace or finalise the missing reference palette. Production exports and source-image transfer remain pending.
+
 ### Approved direction reference — source asset transfer pending
 
 - Source conversation: “Branch · Review Dictate Relaunch Status”, ID `6ac8c154-5d00-83eb-b625-1e7115774ef9`; approval recorded in [DECISIONS.md](../../docs/relaunch/DECISIONS.md) on 2026-10-09.

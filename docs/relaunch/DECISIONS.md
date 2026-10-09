@@ -30,3 +30,10 @@
 - Drafted the interaction contract in the existing [DESIGN.md](DESIGN.md) and a provisional first-textarea implementation brief/acceptance matrix in [TASKS.md](TASKS.md); no parallel specification document or product code was created.
 - Proposed manual whole-field checking, site opt-in, stale-result invalidation, explicit rechecking and guarded Undo are **recommendations pending review**, not recorded user approvals. UX drafting does not select a provider, framework or permission architecture.
 - Visual frames, final tokens/assets and technical readiness gates remain open. The Google Docs high-priority follow-on and no-merge/no-deployment boundaries are unchanged.
+
+## Visual UX review prepared — 2026-10-09
+
+- User requested mockups and flow demonstrations to inform decisions before starting a separate Codex implementation chat.
+- Created [editable Figma review 01](https://www.figma.com/design/DXaOzGDFROeBAD1qmXogHJ/Dictate-UX-review-01?node-id=3-27) and a repository snapshot; linked them from DESIGN.md and the existing asset inventory.
+- This is proposed UI, not user-approved design or software. The mockup's temporary colours and text/artwork placeholders do not supersede the approved A+D reference or settle production assets.
+- Added an explicit implementation-chat readiness checkpoint in TASKS.md. Review, technical decisions and required asset approval remain outstanding; no product code or new implementation chat was created.
