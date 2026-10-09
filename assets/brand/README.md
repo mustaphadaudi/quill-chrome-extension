@@ -28,7 +28,7 @@ assets/brand/
 | Mascot | Editable source or source-design reference, transparent PNG and SVG where appropriate; approved primary pose and expression; usage and crop guidance | Supreme Editor direction selected; final artwork pending |
 | Extension icon | Simplified original mark, proposed PNG exports at 16, 32, 48 and 128 px; inspect at native size on light and dark toolbar backgrounds; confirm runtime requirements in the implementation brief | Crowned-nib direction selected; production exports pending |
 | Palette and typography | Exact colour values with usage roles and tested contrast combinations; light/dark treatment; font names, weights, fallbacks and licence/source records | Palette direction approved; shown hex values preliminary, transcription/verification pending; Bebas Neue headings/Inter body proposed |
-| UI review sheet | Popup, inline suggestion card and onboarding/consent, including success/error states, narrow layouts, focus states, zoom and light/dark variants | Visual mockups approved as direction only; UX flows and interaction specifications pending |
+| UI review sheet | Popup, inline suggestion card and onboarding/consent, including success/error states, narrow layouts, focus states, zoom and light/dark variants | Concept mockups approved as direction only; UX flows/interactions drafted in DESIGN.md pending review; required visual frames and production UI specifications outstanding |
 | Voice examples | Approved short examples for brand moments alongside plain functional, privacy and error copy | Illustrative examples only in BRAND.md |
 
 ## Approval and provenance

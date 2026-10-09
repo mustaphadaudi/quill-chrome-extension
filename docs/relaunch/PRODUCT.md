@@ -31,3 +31,9 @@ Paid subscriptions, user accounts, public Chrome Web Store publication, AI-gener
 
 ## Key decisions still open
 Trademark and domain research for Dictate; privacy and AI inference approach (local vs BYO API); WXT vs lean TypeScript toolchain; final design approval. Remaining visual decisions and asset requirements are tracked in [BRAND.md](BRAND.md) and the [asset handoff](../../assets/brand/README.md).
+
+## UX planning handoff — review draft
+
+[DESIGN.md](DESIGN.md) now defines proposed onboarding, consent, field-checking, correction, popup/settings and recovery flows. Recommended defaults are explicit whole-field checking, site opt-in, invalidation after text changes, no automatic recheck and guarded Undo. These recommendations require review; they are not additions to approved MVP acceptance until adopted.
+
+[TASKS.md](TASKS.md) contains a provisional first-textarea milestone, readiness gates and measurable acceptance scenarios. Contenteditable follows that slice; Google Docs remains a high-priority follow-on. Tone modes, a separate rewrite workspace and automatic checking are deferred from the first slice rather than silently included in the implementation brief. Source image transfer, verified palette values, production assets, interface approval and technical choices remain open.
