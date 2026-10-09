@@ -37,3 +37,13 @@
 - Created [editable Figma review 01](https://www.figma.com/design/DXaOzGDFROeBAD1qmXogHJ/Dictate-UX-review-01?node-id=3-27) and a repository snapshot; linked them from DESIGN.md and the existing asset inventory.
 - This is proposed UI, not user-approved design or software. The mockup's temporary colours and text/artwork placeholders do not supersede the approved A+D reference or settle production assets.
 - Added an explicit implementation-chat readiness checkpoint in TASKS.md. Review, technical decisions and required asset approval remain outstanding; no product code or new implementation chat was created.
+
+
+## M1 handoff released — 2026-10-09
+
+- User response after reviewing mockups: “it seems good. i think we are ready for codex”, with an explicit request for the handoff and necessary commits. This records approval of the reviewed look/flow and authorisation to begin the first coding milestone.
+- Release the existing TASKS.md brief as M1: one textarea, manual checking, suggestion review, Accept/Dismiss, guarded Undo and safe invalidation/recovery. Use the reviewed design as the development reference.
+- Handoff scope choice: use a visibly labelled deterministic local demo checker so editing correctness can be built and tested without inventing a live-processing decision. This is not a claim that the user selected an AI provider or approved a production inference architecture.
+- Retain the mockup's labelled temporary colours/type-only assets for development; original source transfer, final production artwork and exact brand tokens remain open. Do not replace legacy Quill assets.
+- Delegate routine toolchain, test harness and local-demo adapter choices to the implementing engineer, with a bounded preflight and recorded rationale before product edits. Major architecture changes and broader permissions still require review.
+- Live AI integration requires a separate processing/consent/retention/credential decision. Google Docs remains a high-priority follow-on after reliable ordinary-editor support. No merge, deployment, publication or spending is authorised.

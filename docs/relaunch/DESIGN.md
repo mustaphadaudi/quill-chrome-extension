@@ -1,6 +1,6 @@
 # Dictate design and interaction specification v0.3
 
-Status: A+D hybrid brand direction and visual mockups approved as direction only. The UX flows and interaction rules below are a review draft, not user-approved behaviour or authorisation to implement. Pixel-perfect UI specifications and final design tokens remain pending. [BRAND.md](BRAND.md) is the source of truth for brand personality, palette direction and creative boundaries.
+Status: A+D hybrid brand direction and visual mockups approved as direction only. The user approved the reviewed look and flow on 2026-10-09 and requested the first coding handoff. The M1 release in TASKS.md authorises a bounded local-test correction slice; broader production design remains unfinished. Pixel-perfect UI specifications and final design tokens remain pending. [BRAND.md](BRAND.md) is the source of truth for brand personality, palette direction and creative boundaries.
 
 Positioning: a clean, premium, useful and credible writing assistant with a satirical fictional brand universe. Keep the core editing experience calm and legible; place character and humour in surrounding brand moments and optional microcopy. Do not imitate Grammarly's visual identity.
 
@@ -23,17 +23,11 @@ Positioning: a clean, premium, useful and credible writing assistant with a sati
 
 The earlier editorial/teal, technical/blue and creative/violet routes were unapproved explorations and are superseded by the cream/orange/black direction recorded in [DECISIONS.md](DECISIONS.md).
 
-## Next design review
-The A+D route is selected. The immediate next deliverable is UX flows and interaction specifications before Codex implementation:
+## Current implementation reference
 
-- Onboarding and consent: explain checking, permissions and text sharing; define enable, decline and recovery paths.
-- Standard inline editing: explicit check → loading → suggestion → accept/dismiss → undo where supported; define selection/focus, keyboard operation, stale results and scroll/resize behaviour.
-- Toolbar popup and settings: status, site enable/disable, checking controls and preferences, including persistence and feedback.
-- State coverage: empty, success, loading, offline, provider failure and quota exhaustion; keep correction, consent and recovery copy plain.
+The A+D direction and review 01 look/flow have been accepted for the first coding milestone. Use the reviewed screens below together with the M1 scope in [TASKS.md](TASKS.md). Final production artwork, exact tokens, provider consent and later-stage features remain separate review items. Google Docs remains high priority after reliable standard inline editing.
 
-Review these flows in popup, inline suggestion-card and onboarding/consent mockups with light/dark, narrow, zoomed and keyboard/focus views. Evaluate proposed Bebas Neue headings/Inter body and emblem legibility at actual icon sizes. The approved visual references guide appearance but do not specify exact layouts or behaviour. The [brand brief](BRAND.md) lists unresolved decisions; the [asset handoff](../../assets/brand/README.md) defines expected deliverables. Final requirements, design and technical decisions must be agreed before the first bounded implementation brief. Google Docs remains a high-priority follow-on milestone after standard inline editing works. This review does not authorise application implementation.
-
-## Proposed UX contract — review draft
+## Reviewed UX contract — M1 reference
 
 ### Review 01 — editable screens and walkthrough
 
@@ -41,7 +35,7 @@ Review these flows in popup, inline suggestion-card and onboarding/consent mocku
 - [Open the clickable prototype](https://www.figma.com/proto/DXaOzGDFROeBAD1qmXogHJ/Dictate-UX-review-01?node-id=3-27&starting-point-node-id=3%3A27).
 - [Repository snapshot of all screens](../../assets/brand/previews/dictate-ux-review-01.png).
 
-Created 2026-10-09 for review, not approved production UI. Twelve editable frames cover welcome, consent, ready popup, checking, correction, applied/Undo, dismissal, stale results, connection failure, settings, dark/narrow/focus and off/setup-deferred. There are 29 navigation actions and three reusable button components. This is a Figma simulation: no real checking, stored settings, permission grant or provider connection. Preview controls branch to returned results, changed text and connection failure; they are review-only controls, not proposed product buttons.
+Created 2026-10-09 and subsequently accepted as the M1 look/flow reference, not final production UI. Twelve editable frames cover welcome, consent, ready popup, checking, correction, applied/Undo, dismissal, stale results, connection failure, settings, dark/narrow/focus and off/setup-deferred. There are 29 navigation actions and three reusable button components. This is a Figma simulation: no real checking, stored settings, permission grant or provider connection. Preview controls branch to returned results, changed text and connection failure; they are review-only controls, not proposed product buttons.
 
 The canvas uses temporary review colours to make the layouts judgeable: cream `#F7F2E8`, orange `#F26A2E`, charcoal `#242421`, sand `#E8DFCF`, muted text `#625E56`, white `#FFFFFF`, dark surface `#191C1B`, dark panel `#292D2A`, dark secondary text `#C5CABC`. These are newly selected mockup values, **not transcriptions of the inaccessible approved reference and not implementation-locked tokens**. The reference palette still needs transfer/verification. Sage/sunset accents can be considered in later artwork; they are not needed for these functional screens.
 
@@ -56,9 +50,9 @@ Review decisions:
 
 Validation: rendered the full canvas, corrected text/container sizing, inspected the revised composition and checked the specified fonts and screen bounds. Prototype destinations were structurally checked; this does not establish live keyboard/screen-reader behaviour or production browser compatibility. The final Figma flow includes branches for stale/error cases and Undo returns to the original text ready for a fresh check.
 
-Implementation starts only after review feedback and the readiness gates in [TASKS.md](TASKS.md) are resolved. Do not interpret a request to create these mockups as approval of their contents.
+The user subsequently approved the reviewed look and flow and requested implementation on 2026-10-09. [TASKS.md](TASKS.md) releases M1 with a local demo checker and technical preflight. Final artwork and live processing remain gated.
 
-These are recommended defaults to review together. They deliberately leave provider, framework, permission implementation and exact visual tokens unresolved. The first vertical slice supports one ordinary textarea; contenteditable follows, then the high-priority Google Docs milestone. A tone selector, rewrite workspace and automatic checking are outside this first slice.
+These are the reviewed defaults for M1; later-stage features remain outside its scope. They deliberately leave provider, framework, permission implementation and exact visual tokens unresolved. The first vertical slice supports one ordinary textarea; contenteditable follows, then the high-priority Google Docs milestone. A tone selector, rewrite workspace and automatic checking are outside this first slice.
 
 ### Flow 1 — first use and consent
 
@@ -178,8 +172,8 @@ Produce these frames from this interaction draft after review; the existing conc
 
 For each applicable frame, include light/dark, narrow and keyboard-focus variants. Use text placeholders for unavailable source artwork, not invented final mascot/vector assets. Colour roles are surface, primary text, secondary surface, accent action, focus and semantic feedback; map them to verified values only after source transfer and contrast checks.
 
-### Review decisions before implementation
+### Remaining decisions beyond the reviewed flow
 
-Recommended UX defaults to approve or amend: manual whole-field checking, exact-origin site opt-in, no automatic recheck, invalidation of all field suggestions after an edit, and guarded single-change Undo. Review the flows above as one coherent proposal rather than treating draft defaults as already approved.
+Reviewed M1 UX defaults: manual whole-field checking, exact-origin site opt-in, no automatic recheck, invalidation of all field suggestions after an edit, and guarded single-change Undo. Approval of the reviewed flow does not imply approval of final production tokens, provider handling or broader features.
 
-Still required: choose local vs BYO API processing and its consent/retention details; agree permissions and credential handling; choose toolchain after a bounded spike; approve visual frames/tokens and production assets; set request size/time limits. [TASKS.md](TASKS.md) contains the first-slice brief and readiness gates. The Google Docs follow-on must validate actual editor behaviour and provide an explicit unsupported/fallback path without implying universal compatibility.
+M1 first requires its bounded engineering preflight. Before live inference and production polish: choose local vs BYO API processing and its consent/retention details; agree broader permissions and credential handling; verify final tokens/assets and provider limits. [TASKS.md](TASKS.md) contains the first-slice brief and readiness gates. The Google Docs follow-on must validate actual editor behaviour and provide an explicit unsupported/fallback path without implying universal compatibility.
