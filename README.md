@@ -1,4 +1,14 @@
-# Quill — personal Chrome writing assistant
+# Dictate — writing assistant relaunch
+
+This branch, `relaunch/clean-slate-v1`, contains the planning documentation for **Dictate**, the approved name for the clean-sheet successor to Quill. The name and high-level brand direction are approved; final visual assets, interface designs and technical choices remain open. No Dictate application implementation is claimed by this documentation update.
+
+Start with the [product requirements](docs/relaunch/PRODUCT.md), [interface direction](docs/relaunch/DESIGN.md), [brand brief](docs/relaunch/BRAND.md), [decision log](docs/relaunch/DECISIONS.md), [backlog](docs/relaunch/TASKS.md), and [visual-asset handoff](assets/brand/README.md). Coding agents must follow [AGENTS.md](AGENTS.md).
+
+## Legacy Quill reference
+
+The application files and installation notes below describe the existing Quill prototype, not an implemented Dictate release. Quill history remains preserved on `main`.
+
+### Quill — personal Chrome writing assistant
 
 Vanilla HTML, CSS and JavaScript, loaded directly as an unpacked Chrome extension. No build step, backend, subscriptions or upgrade prompts.
 

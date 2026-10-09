@@ -1,6 +1,6 @@
-# Writing assistant relaunch — product requirements v0.1
+# Dictate — product requirements v0.2
 
-Status: discovery/approval; working title TBD. This is a clean-sheet implementation while preserving Quill v0.x on the main branch.
+Status: discovery/approval. **Dictate** is the approved product name, with an approved high-level [brand direction](BRAND.md). Final interface design and technical choices remain open. This is a clean-sheet implementation while preserving Quill v0.x on the main branch. Name approval does not imply completed trademark or domain checks.
 
 ## Product promise
 A fast, private-by-design writing assistant that flags spelling, grammar and clarity problems in text fields, explains corrections, and applies approved edits without breaking the user's writing.
@@ -30,4 +30,4 @@ A fast, private-by-design writing assistant that flags spelling, grammar and cla
 Paid subscriptions, user accounts, public Chrome Web Store publication, AI-generated advertising and broad agentic browsing.
 
 ## Key decisions still open
-Brand name/trademark and domain research; privacy and AI inference approach (local vs BYO API); WXT vs lean TypeScript toolchain; final design approval.
+Trademark and domain research for Dictate; privacy and AI inference approach (local vs BYO API); WXT vs lean TypeScript toolchain; final design approval. Remaining visual decisions and asset requirements are tracked in [BRAND.md](BRAND.md) and the [asset handoff](../../assets/brand/README.md).

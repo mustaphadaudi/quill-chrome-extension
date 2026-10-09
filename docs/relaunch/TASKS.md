@@ -1,12 +1,18 @@
-# Development backlog — clean-slate relaunch
+# Dictate development backlog — clean-slate relaunch
 
 ## Stage 0 — groundwork
 - [x] Preserve legacy Quill code on main by creating relaunch/clean-slate-v1.
 - [x] Record product brief and agent rules.
-- [ ] Choose product name (candidate only until legal/domain checks).
-- [ ] Approve UI direction and basic user flows.
+- [x] Approve product name: Dictate.
+- [ ] Complete trademark/domain checks; name approval does not claim clearance or availability.
+- [x] Record approved high-level brand direction in [BRAND.md](BRAND.md).
+- [x] Establish [visual-asset handoff specifications](../../assets/brand/README.md); no final artwork yet.
+- [ ] Review two or three original mascot/logo routes in popup, suggestion-card and onboarding mockups; select one route.
+- [ ] Approve final UI direction, basic user flows, palette tokens, typography and microcopy boundaries using [DESIGN.md](DESIGN.md).
+- [ ] Produce and approve final assets with provenance and small-size, light/dark and accessibility checks per the asset handoff.
 - [ ] Decide data/inference model and acceptable permissions.
 - [ ] Decide framework after a small documented spike.
+- [ ] Confirm product requirements and prepare the first bounded Codex implementation brief with acceptance checks once design and technical decisions are agreed.
 
 ## Stage 1 — vertical slice
 - [ ] Create isolated new source tree and minimal MV3 extension manifest.
