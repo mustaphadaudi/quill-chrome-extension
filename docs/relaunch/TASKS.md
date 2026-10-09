@@ -7,7 +7,9 @@
 - [ ] Complete trademark/domain checks; name approval does not claim clearance or availability.
 - [x] Record approved high-level brand direction in [BRAND.md](BRAND.md).
 - [x] Establish [visual-asset handoff specifications](../../assets/brand/README.md); no final artwork yet.
-- [ ] Review two or three original mascot/logo routes in popup, suggestion-card and onboarding mockups; select one route.
+- [x] Select A+D hybrid: Supreme Editor character for marketing/onboarding and crowned fountain-pen nib emblem for logo/icon; visual mockups approved as direction only.
+- [ ] Transfer the approved reference image and record provenance in the existing asset inventory; transcribe shown preliminary hex values and verify before locking tokens.
+- [ ] Next: specify UX flows and interactions for onboarding/consent, inline check/accept/dismiss/undo, popup/settings and loading/empty/error states before Codex implementation.
 - [ ] Approve final UI direction, basic user flows, palette tokens, typography and microcopy boundaries using [DESIGN.md](DESIGN.md).
 - [ ] Produce and approve final assets with provenance and small-size, light/dark and accessibility checks per the asset handoff.
 - [ ] Decide data/inference model and acceptable permissions.

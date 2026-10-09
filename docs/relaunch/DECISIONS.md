@@ -14,3 +14,12 @@
 - The earlier unapproved visual routes in DESIGN.md are superseded. Exact colours, fonts, mascot appearance/name, logo, final copy and interface mockups are not yet approved. No finished brand assets are established by this decision.
 - Approval source: the user's explicit documentation-update request following “Review Dictate Relaunch Status”. Any earlier concept image is exploratory, not an approved production asset.
 - Product scope, privacy requirements, Google Docs sequencing and implementation/release approval boundaries remain unchanged.
+
+## Dictate A+D hybrid approval — 2026-10-09
+
+- The user approved the refined A+D hybrid following “Branch · Review Dictate Relaunch Status” (conversation `6ac8c154-5d00-83eb-b625-1e7115774ef9`) and explicitly requested this repository update. **Dictate** remains the approved product name.
+- This supersedes the earlier unselected mascot/logo route and fictional institution status: A's original fictional **Supreme Editor** general (moustache, sunglasses, ceremonial cap, writing-themed decorations) serves marketing/onboarding; D's minimalist **crowned fountain-pen nib**, orange/black with a strong Dictate wordmark, supplies the logo and extension-icon direction.
+- Approve the fictional **Ministry of Clarity** setting and witty propaganda-inspired voice around a clear, restrained correction UI. Do not copy GTA/Rockstar proprietary elements or real authoritarian insignia. [BRAND.md](BRAND.md) owns the detailed direction.
+- Palette direction: warm cream, vivid orange, charcoal and sand, with limited sunset orange and sage accents. Shown hex values are preliminary, not implementation-locked until verified. They could not be read from the inaccessible reference; transcription and verification remain pending. Bebas Neue headings and Inter body are proposed.
+- Visual mockups are approved **as direction only**, not pixel-perfect UI specifications or final production vector assets. Source reference: `/mnt/data/dictate_authoritarian_grammar_playful_design.png`; source asset transfer pending. See the existing [asset inventory](../../assets/brand/README.md) for provenance and transfer status.
+- Immediate next step: UX flows and interaction specifications before Codex implementation. Google Docs remains a high-priority follow-on milestone after standard inline editing works. No product code, merge or deployment is authorised by this documentation decision.
